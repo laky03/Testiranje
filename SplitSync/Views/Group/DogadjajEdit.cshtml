@@ -1,0 +1,122 @@
+﻿@model SplitSync.Models.DogadjajEditViewModel
+@{
+    ViewData["Title"] = "Uredi događaj";
+}
+
+<section class="app-hero">
+    <h1>Uredi događaj</h1>
+    <p>Promeni osnovne informacije, opcionalno izaberi novu sliku ili obriši događaj.</p>
+</section>
+
+<div class="app-card app-card-narrow">
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+            <div class="alert alert-danger">@Model.ErrorMessage</div>
+    }
+
+    <form asp-action="DogadjajEdit"
+          asp-controller="Group"
+          method="post"
+          enctype="multipart/form-data"
+          class="form-stacked">
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" asp-for="GrupaId" />
+        <input type="hidden" asp-for="Id" />
+
+        <div class="form-field stretch">
+            <label class="form-label">Naziv</label>
+            <input asp-for="Naziv" class="input input-full" placeholder="npr. Proslava rođendana" autocomplete="off" />
+        </div>
+
+        <div class="form-field stretch">
+            <label class="form-label">Opis</label>
+            <textarea asp-for="Opis" rows="5" class="input input-full" placeholder="Kratak opis..."></textarea>
+        </div>
+
+        <div class="form-field stretch">
+            <label class="form-label">Lokacija</label>
+            <input asp-for="Lokacija" class="input input-full" placeholder="npr. Kej, kafic XYZ" autocomplete="off" />
+        </div>
+
+        <div class="form-field">
+            <label class="form-label">Slika (opciono)</label>
+            <div class="upload-dropzone">
+                <label for="novaSlikaInput" class="dz-label">
+                    <i class="ri-image-add-line"></i>
+                    <span class="dz-text">
+                        <strong>Promeni sliku</strong> – prevuci ili
+                        <span class="dz-link">odaberi fajl</span>
+                    </span>
+                </label>
+                <input class="dz-input" type="file" asp-for="NovaSlika" id="novaSlikaInput" accept="image/*" />
+            </div>
+            @if (!string.IsNullOrWhiteSpace(Model.CurrentSlikaBase64))
+            {
+                <div class="upload-preview" id="slikaPreview">
+                    <img src="data:image/*;base64,@Model.CurrentSlikaBase64" alt="Preview" />
+                </div>
+            }
+            else
+            {
+                <div class="upload-preview" id="slikaPreview" style="display:none">
+                    <img alt="Preview" />
+                </div>
+            }
+        </div>
+
+        <div class="form-actions">
+            <a class="btn" asp-controller="Group" asp-action="Dogadjaji" asp-route-id="@Model.GrupaId">
+                <i class="bx bx-left-arrow-alt"></i> Nazad
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="bx bx-save"></i> Sačuvaj
+            </button>
+        </div>
+    </form>
+
+    <div class="danger-zone mt-16">
+        <div>
+            <h4>Obriši događaj</h4>
+            <p class="muted">Ova akcija je trajna i ne može se poništiti.</p>
+        </div>
+        <form asp-action="DeleteDogadjaj" asp-controller="Group" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="grupaId" value="@Model.GrupaId" />
+            <input type="hidden" name="dogadjajId" value="@Model.Id" />
+            <button type="submit" class="btn btn-danger">
+                <i class="bx bx-trash"></i> Obriši
+            </button>
+        </form>
+    </div>
+</div>
+
+@section Styles {
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet" />
+}
+
+@section Scripts {
+    <script>
+    (() => {
+      const input = document.getElementById('novaSlikaInput');
+      const previewContainer = document.getElementById('slikaPreview');
+      const previewImg = previewContainer?.querySelector('img');
+
+      input?.addEventListener('change', () => {
+        const file = input.files?.[0];
+        if (!file) {
+          if (previewContainer && !previewContainer.querySelector('img').src.includes('base64')) {
+            previewContainer.style.display = 'none';
+          }
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          if (previewImg) previewImg.src = e.target.result;
+          if (previewContainer) previewContainer.style.display = 'flex';
+        };
+        reader.readAsDataURL(file);
+      });
+    })();
+    </script>
+}

@@ -1,0 +1,294 @@
+﻿@model SplitSync.Models.GroupsIndexViewModel
+@{
+    ViewData["Title"] = "Groups";
+}
+
+<div class="app-hero">
+    <h1>Moje grupe</h1>
+    <p>Pregled grupa u kojima si član — brzo uđi u grupu ili prihvati nove pozivnice.</p>
+</div>
+
+<div class="card-toolbar">
+    <div class="stat-meta hero-stat">
+        <span class="stat-label">Ukupno grupa</span>
+        <span class="stat-value">@Model.Groups?.Count()</span>
+    </div>
+    <a class="btn btn-primary" href="@Url.Action("Create", "Groups")">
+        <i class="ri-add-line"></i>
+        Nova grupa
+    </a>
+</div>
+
+@if (Model.Invitations != null && Model.Invitations.Any())
+{
+    <div class="app-card mt-0 mb-10">
+        <h3 class="mt-0">Pozivnice</h3>
+        <div id="invitations-container" class="invites-list">
+            @foreach (var inv in Model.Invitations)
+            {
+                <div class="invite-item mb-10" data-id="@inv.InvitationId" data-utc="@inv.CreatedAtUtc.ToUniversalTime().ToString("o")">
+                    <div class="invite-main">
+                        <div class="invite-icon"><i class="ri-mail-add-line"></i></div>
+                        <div class="invite-text">
+                            <div class="invite-title">@inv.GroupName</div>
+                            <div class="invite-sub">Pozvao: @inv.InvitedBy</div>
+                        </div>
+                    </div>
+                    <div class="invite-actions">
+                        <form asp-action="AcceptInvite" asp-controller="Groups" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="invitationId" value="@inv.InvitationId" />
+                            <button class="btn btn-primary btn-sm" type="submit">
+                                <i class="ri-check-line"></i> Prihvati
+                            </button>
+                        </form>
+                        <form asp-action="DeclineInvite" asp-controller="Groups" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="invitationId" value="@inv.InvitationId" />
+                            <button class="btn btn-danger btn-sm" type="submit">
+                                <i class="ri-close-line"></i> Odbij
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <div id="invitations-container" class="invites-list" style="display: none;"></div>
+}
+
+@if (Model.Groups == null || !Model.Groups.Any())
+{
+    <div class="empty-state">
+        <div class="empty-icon"><i class="ri-group-line"></i></div>
+        <h3>Nemaš još uvek nijednu grupu</h3>
+        <p>Kreiraj prvu grupu i pozovi ostale članove.</p>
+        <a class="btn btn-primary" href="@Url.Action("Create", "Groups")">
+            <i class="ri-add-line"></i> Napravi grupu
+        </a>
+    </div>
+}
+else
+{
+    <div class="app-card mt-0">
+        <div class="groups-grid">
+            @foreach (var g in Model.Groups)
+            {
+                <div class="group-card">
+                    <div class="group-cover">
+                        @if (!string.IsNullOrEmpty(g.ImageBase64))
+                        {
+                            <img src="data:image/png;base64,@g.ImageBase64" alt="@g.Name" />
+                        }
+                        else
+                        {
+                            <div class="group-cover-fallback" aria-hidden="true">
+                                <span>@(string.IsNullOrWhiteSpace(g.Name) ? "G" : char.ToUpper(g.Name[0]))</span>
+                            </div>
+                        }
+                    </div>
+                    <div class="group-body">
+                        <div class="group-title-row">
+                            <h4 class="group-name">@g.Name</h4>
+                            @if (g.IsOwner)
+                            {
+                                <span class="owner-badge">Vlasnik</span>
+                            }
+                        </div>
+                        <div class="group-actions">
+                            <a class="btn btn-secondary btn-sm" href="@Url.Action("Index", "Group", new { id = g.Id })">
+                                <i class="ri-arrow-right-line"></i> Otvori
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@section Styles {
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet" />
+}
+
+@section Scripts {
+    <script>
+        (function(){
+            const container = document.getElementById('invitations-container');
+            if (!container) return;
+
+            if (window.__invitationsTimer) { clearInterval(window.__invitationsTimer); }
+            let inflight = null;
+            let lastUtc = null;
+
+            function createInvitationNode(inv) {
+                const root = document.createElement('div');
+                root.className = 'invite-item';
+                root.dataset.id = String(inv.invitationId);
+                root.dataset.utc = inv.createdAtUtc;
+
+                const inviteMain = document.createElement('div');
+                inviteMain.className = 'invite-main';
+
+                const inviteIcon = document.createElement('div');
+                inviteIcon.className = 'invite-icon';
+                inviteIcon.innerHTML = '<i class="ri-mail-add-line"></i>';
+
+                const inviteText = document.createElement('div');
+                inviteText.className = 'invite-text';
+
+                const inviteTitle = document.createElement('div');
+                inviteTitle.className = 'invite-title';
+                inviteTitle.textContent = inv.groupName;
+
+                const inviteSub = document.createElement('div');
+                inviteSub.className = 'invite-sub';
+                inviteSub.textContent = `Pozvao: ${inv.invitedBy}`;
+
+                inviteText.appendChild(inviteTitle);
+                inviteText.appendChild(inviteSub);
+
+                inviteMain.appendChild(inviteIcon);
+                inviteMain.appendChild(inviteText);
+
+                const inviteActions = document.createElement('div');
+                inviteActions.className = 'invite-actions';
+
+                const acceptForm = document.createElement('form');
+                acceptForm.action = '/Groups/AcceptInvite';
+                acceptForm.method = 'post';
+                
+                const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (csrfToken) {
+                    const csrfInput = document.createElement('input');
+                    csrfInput.type = 'hidden';
+                    csrfInput.name = '__RequestVerificationToken';
+                    csrfInput.value = csrfToken.value;
+                    acceptForm.appendChild(csrfInput);
+                }
+
+                const invitationIdInput = document.createElement('input');
+                invitationIdInput.type = 'hidden';
+                invitationIdInput.name = 'invitationId';
+                invitationIdInput.value = inv.invitationId;
+                acceptForm.appendChild(invitationIdInput);
+
+                const acceptBtn = document.createElement('button');
+                acceptBtn.type = 'submit';
+                acceptBtn.className = 'btn btn-primary btn-sm';
+                acceptBtn.innerHTML = '<i class="ri-check-line"></i> Prihvati';
+                acceptForm.appendChild(acceptBtn);
+
+                const declineForm = document.createElement('form');
+                declineForm.action = '/Groups/DeclineInvite';
+                declineForm.method = 'post';
+                
+                if (csrfToken) {
+                    const csrfInput2 = document.createElement('input');
+                    csrfInput2.type = 'hidden';
+                    csrfInput2.name = '__RequestVerificationToken';
+                    csrfInput2.value = csrfToken.value;
+                    declineForm.appendChild(csrfInput2);
+                }
+
+                const invitationIdInput2 = document.createElement('input');
+                invitationIdInput2.type = 'hidden';
+                invitationIdInput2.name = 'invitationId';
+                invitationIdInput2.value = inv.invitationId;
+                declineForm.appendChild(invitationIdInput2);
+
+                const declineBtn = document.createElement('button');
+                declineBtn.type = 'submit';
+                declineBtn.className = 'btn btn-danger btn-sm';
+                declineBtn.innerHTML = '<i class="ri-close-line"></i> Odbij';
+                declineForm.appendChild(declineBtn);
+
+                inviteActions.appendChild(acceptForm);
+                inviteActions.appendChild(declineForm);
+
+                root.appendChild(inviteMain);
+                root.appendChild(inviteActions);
+
+                return root;
+            }
+
+            function initLast() {
+                const items = container.querySelectorAll('.invite-item');
+                if (!items.length) return;
+                const first = items[0];
+                lastUtc = first.dataset.utc || null;
+            }
+
+            initLast();
+
+            async function tick() {
+                try {
+                    if (inflight) { inflight.abort(); inflight = null; }
+                    inflight = new AbortController();
+
+                    let url = '/api/nove-pozivnice';
+                    if (lastUtc) {
+                        const back1s = new Date(new Date(lastUtc).getTime() - 1000).toISOString();
+                        url += `?odUtc=${encodeURIComponent(back1s)}`;
+                    }
+
+                    const res = await fetch(url, {
+                        headers: { 'Accept': 'application/json' },
+                        cache: 'no-store',
+                        signal: inflight.signal,
+                    });
+                    if (!res.ok) return;
+
+                    const list = await res.json();
+                    if (!Array.isArray(list) || list.length === 0) return;
+
+                    const seen = new Set([...container.querySelectorAll('.invite-item')].map(n => n.dataset.id));
+                    const frag = document.createDocumentFragment();
+                    let prepended = 0;
+
+                    for (const inv of list) {
+                        const idStr = String(inv.invitationId);
+                        if (seen.has(idStr)) continue;
+                        frag.appendChild(createInvitationNode(inv));
+                        lastUtc = inv.createdAtUtc;
+                        prepended++;
+                    }
+
+                    if (prepended) {
+                        container.insertBefore(frag, container.firstChild);
+                        container.style.display = 'block';
+                        
+                        const invitationsCard = container.closest('.app-card');
+                        if (invitationsCard && invitationsCard.style.display === 'none') {
+                            invitationsCard.style.display = 'block';
+                        }
+                    }
+                } catch(e) { } 
+                finally {
+                    inflight = null;
+                }
+            }
+
+            window.__invitationsTimer = setInterval(tick, 10000);
+
+            tick();
+
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    if (window.__invitationsTimer) { 
+                        clearInterval(window.__invitationsTimer); 
+                        window.__invitationsTimer = null; 
+                    }
+                } else {
+                    if (!window.__invitationsTimer) { 
+                        window.__invitationsTimer = setInterval(tick, 10000); 
+                        tick(); 
+                    }
+                }
+            });
+        })();
+    </script>
+}

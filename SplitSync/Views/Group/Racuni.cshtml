@@ -1,0 +1,274 @@
+﻿@model SplitSync.Models.RacuniViewModel
+@{
+    ViewData["Title"] = "Računi";
+}
+
+<section class="app-hero">
+    <h1>Računi</h1>
+    <p>Pregled i podela troškova u grupi.</p>
+</section>
+
+<div class="app-card card-toolbar">
+    <h2 class="mt-0 mb-0">Računi u grupi</h2>
+    <a class="btn btn-primary" asp-controller="Group" asp-action="NoviRacun" asp-route-id="@Model.GroupId">
+        <i class="bx bx-plus"></i> Novi račun
+    </a>
+</div>
+
+@if (Model?.Racuni == null || !Model.Racuni.Any())
+{
+        <div class="app-card empty-state">
+            <div class="empty-icon"><i class="bx bx-receipt"></i></div>
+            <h3>Još uvek nema računa</h3>
+            <p>Dodaj prvi račun i podeli trošak sa članovima grupe.</p>
+            <a class="btn btn-primary" asp-controller="Group" asp-action="NoviRacun" asp-route-id="@Model.GroupId">
+                <i class="bx bx-plus"></i> Novi račun
+            </a>
+        </div>
+}
+else
+{
+    <div id="racuni-container">
+        @foreach (var racun in Model.Racuni)
+        {
+            <div class="app-card bill-card" data-id="@racun.Id" data-utc="@racun.CreatedAtUtc.ToUniversalTime().ToString("o")">
+                <div class="bill-head">
+                    <div class="bill-title-wrap">
+                        <h3 class="bill-title">@racun.Naziv</h3>
+                        <span class="amount-chip">@racun.Iznos.ToString("0.##")</span>
+                    </div>
+
+                    @if(racun.UserCanDelete) {
+                        <form asp-controller="Group"
+                                asp-action="DeleteRacun"
+                                asp-route-groupId="@Model.GroupId"
+                                asp-route-racunId="@racun.Id"
+                                method="post">
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                <i class="bx bx-trash"></i> Obriši
+                            </button>
+                        </form>
+                    }
+                </div>
+
+                <div class="table-wrap">
+                    <table class="bill-table">
+                        <thead>
+                            <tr>
+                                <th>Član</th>
+                                <th>Platio</th>
+                                <th>Deo računa</th>
+                                <th>Saldo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in racun.Items)
+                            {
+                                var ime = item.Nickname != null ? $"{item.Nickname} ({item.Username})" : item.Username;
+                                var saldo = (item.Iznos  ) - (item.DeoRacuna  );
+                                var saldoClass = saldo >= 0 ? "saldo-pos" : "saldo-neg";
+                                <tr>
+                                    <td>@ime</td>
+                                    <td>@(item.Iznos.ToString("0.##") ?? "0")</td>
+                                    <td>@(item.DeoRacuna.ToString("0.##") ?? "0")</td>
+                                    <td>
+                                        <span class="saldo-chip @saldoClass">
+                                            @saldo.ToString("0.##")
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@section Scripts {
+    <script>
+        (function(){
+            const container = document.getElementById('racuni-container');
+            if (!container) return;
+
+            const groupId = @Model.GroupId;
+
+            if (window.__racuniTimer) { clearInterval(window.__racuniTimer); }
+            let inflight = null;
+            let lastUtc = null;
+
+            function createRacunNode(r) {
+                const root = document.createElement('div');
+                root.className = 'app-card bill-card';
+                root.dataset.id = String(r.id);
+                root.dataset.utc = r.createdAtUtc;
+
+                const billHead = document.createElement('div');
+                billHead.className = 'bill-head';
+
+                const billTitleWrap = document.createElement('div');
+                billTitleWrap.className = 'bill-title-wrap';
+
+                const billTitle = document.createElement('h3');
+                billTitle.className = 'bill-title';
+                billTitle.textContent = r.naziv;
+
+                const amountChip = document.createElement('span');
+                amountChip.className = 'amount-chip';
+                amountChip.textContent = r.iznos.toFixed(2);
+
+                billTitleWrap.appendChild(billTitle);
+                billTitleWrap.appendChild(amountChip);
+
+                const deleteForm = document.createElement('form');
+                deleteForm.action = '/Group/DeleteRacun';
+                deleteForm.method = 'post';
+                
+                const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (csrfToken) {
+                    const csrfInput = document.createElement('input');
+                    csrfInput.type = 'hidden';
+                    csrfInput.name = '__RequestVerificationToken';
+                    csrfInput.value = csrfToken.value;
+                    deleteForm.appendChild(csrfInput);
+                }
+
+                const groupIdInput = document.createElement('input');
+                groupIdInput.type = 'hidden';
+                groupIdInput.name = 'groupId';
+                groupIdInput.value = groupId;
+                deleteForm.appendChild(groupIdInput);
+
+                const racunIdInput = document.createElement('input');
+                racunIdInput.type = 'hidden';
+                racunIdInput.name = 'racunId';
+                racunIdInput.value = r.id;
+                deleteForm.appendChild(racunIdInput);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.type = 'submit';
+                deleteBtn.className = 'btn btn-danger btn-sm';
+                deleteBtn.innerHTML = '<i class="bx bx-trash"></i> Obriši';
+                deleteForm.appendChild(deleteBtn);
+
+                billHead.appendChild(billTitleWrap);
+                billHead.appendChild(deleteForm);
+
+                const tableWrap = document.createElement('div');
+                tableWrap.className = 'table-wrap';
+
+                const table = document.createElement('table');
+                table.className = 'bill-table';
+
+                const thead = document.createElement('thead');
+                thead.innerHTML = `
+                    <tr>
+                        <th>Član</th>
+                        <th>Platio</th>
+                        <th>Deo računa</th>
+                        <th>Saldo</th>
+                    </tr>
+                `;
+
+                const tbody = document.createElement('tbody');
+                r.items.forEach(item => {
+                    const ime = item.nickname ? `${item.nickname} (${item.username})` : item.username;
+                    const saldo = item.iznos - item.deoRacuna;
+                    const saldoClass = saldo >= 0 ? 'saldo-pos' : 'saldo-neg';
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${ime}</td>
+                        <td>${item.iznos.toFixed(2)}</td>
+                        <td>${item.deoRacuna.toFixed(2)}</td>
+                        <td>
+                            <span class="saldo-chip ${saldoClass}">
+                                ${saldo.toFixed(2)}
+                            </span>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                table.appendChild(thead);
+                table.appendChild(tbody);
+                tableWrap.appendChild(table);
+
+                root.appendChild(billHead);
+                root.appendChild(tableWrap);
+
+                return root;
+            }
+
+            function initLast() {
+                const items = container.querySelectorAll('.bill-card');
+                if (!items.length) return;
+                const first = items[0];
+                lastUtc = first.dataset.utc || null;
+            }
+
+            initLast();
+
+            async function tick() {
+                try {
+                    if (inflight) { inflight.abort(); inflight = null; }
+                    inflight = new AbortController();
+
+                    let url = `/api/novi-racuni?groupId=${encodeURIComponent(groupId)}`;
+                    if (lastUtc) {
+                        const back1s = new Date(new Date(lastUtc).getTime() - 1000).toISOString();
+                        url += `&odUtc=${encodeURIComponent(back1s)}`;
+                    }
+
+                    const res = await fetch(url, {
+                        headers: { 'Accept': 'application/json' },
+                        cache: 'no-store',
+                        signal: inflight.signal,
+                    });
+                    if (!res.ok) return;
+
+                    const list = await res.json();
+                    if (!Array.isArray(list) || list.length === 0) return;
+
+                    const seen = new Set([...container.querySelectorAll('.bill-card')].map(n => n.dataset.id));
+                    const frag = document.createDocumentFragment();
+                    let prepended = 0;
+
+                    for (const r of list) {
+                        const idStr = String(r.id);
+                        if (seen.has(idStr)) continue;
+                        frag.appendChild(createRacunNode(r));
+                        lastUtc = r.createdAtUtc;
+                        prepended++;
+                    }
+
+                    if (prepended) {
+                        container.insertBefore(frag, container.firstChild);
+                    }
+                } catch(e) { } 
+                finally {
+                    inflight = null;
+                }
+            }
+
+            window.__racuniTimer = setInterval(tick, 10000);
+
+            tick();
+
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    if (window.__racuniTimer) { 
+                        clearInterval(window.__racuniTimer); 
+                        window.__racuniTimer = null; 
+                    }
+                } else {
+                    if (!window.__racuniTimer) { 
+                        window.__racuniTimer = setInterval(tick, 10000); 
+                        tick(); 
+                    }
+                }
+            });
+        })();
+    </script>
+}

@@ -1,0 +1,126 @@
+﻿@model SplitSync.Models.GroupCreateViewModel
+@{
+    ViewData["Title"] = "Nova grupa";
+}
+<div class="app-hero">
+    <h1>Napravi grupu</h1>
+    <p>Unesi naziv grupe i (po želji) sliku koja će se prikazivati kao cover.</p>
+</div>
+
+<div class="app-card app-card-narrow">
+    @if (!string.IsNullOrWhiteSpace(Model?.ErrorMessage))
+    {
+        <div class="app-alert error" role="alert">
+            <i class="ri-error-warning-line"></i>
+            <span>@Model.ErrorMessage</span>
+        </div>
+    }
+
+    <form asp-action="Create" asp-controller="Groups" method="post" enctype="multipart/form-data" class="form-stacked group-create-form">
+        @Html.AntiForgeryToken()
+
+        <div class="form-field stretch">
+            <label for="Name" class="form-label">Naziv grupe <span aria-hidden="true" style="color:#e53e3e">*</span></label>
+            <input id="Name" name="Name" class="input" type="text" value="@Model?.Name" placeholder="npr. Ekipa za putovanje" required />
+        </div>
+
+        <div class="form-field stretch mt-16">
+            <label class="form-label">Slika (opciono)</label>
+            <div id="dropzone" class="upload-dropzone" tabindex="0" role="button" aria-label="Otpremi sliku">
+                <i class="ri-image-add-line"></i>
+                <div class="dz-text">
+                    <strong>Prevuci sliku ovde</strong> ili
+                    <label for="ImageUpload" class="dz-link">izaberi fajl</label>
+                </div>
+                <input id="ImageUpload" name="ImageUpload" type="file" accept="image/*" class="dz-input" />
+            </div>
+
+            <div id="previewWrap" class="upload-preview" style="display:none;">
+                <img id="imgPreview" alt="Pregled slike" />
+                <button type="button" id="clearImage" class="btn btn-ghost btn-sm">
+                    <i class="ri-close-line"></i> Ukloni sliku
+                </button>
+            </div>
+        </div>
+
+        <div class="form-actions mt-16" style="display:flex; gap:10px;">
+            <button type="submit" class="btn btn-primary">
+                <i class="ri-check-line"></i> Napravi grupu
+            </button>
+            <a href="@Url.Action("Index", "Groups")" class="btn btn-secondary">
+                <i class="ri-arrow-left-line"></i> Nazad na grupe
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Styles {
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet" />
+}
+
+@section Scripts {
+    <script>
+        (function () {
+            const input = document.getElementById('ImageUpload');
+            const dz = document.getElementById('dropzone');
+            const wrap = document.getElementById('previewWrap');
+            const img = document.getElementById('imgPreview');
+            const clearBtn = document.getElementById('clearImage');
+
+            function showPreview(file) {
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = e => {
+                    img.src = e.target.result;
+                    wrap.style.display = 'flex';
+                };
+                reader.readAsDataURL(file);
+            }
+
+            dz.addEventListener('click', (e) => {
+                const target = e.target;
+                if (target.id === 'ImageUpload') return;
+                input.click();
+            });
+
+            dz.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    input.click();
+                }
+            });
+
+            ['dragenter','dragover'].forEach(evt =>
+                dz.addEventListener(evt, (e) => {
+                    e.preventDefault(); e.stopPropagation();
+                    dz.classList.add('is-dragover');
+                })
+            );
+            ['dragleave','drop'].forEach(evt =>
+                dz.addEventListener(evt, (e) => {
+                    e.preventDefault(); e.stopPropagation();
+                    dz.classList.remove('is-dragover');
+                })
+            );
+            dz.addEventListener('drop', (e) => {
+                const file = e.dataTransfer.files && e.dataTransfer.files[0];
+                if (file) {
+                    input.files = e.dataTransfer.files;
+                    showPreview(file);
+                }
+            });
+
+            input.addEventListener('change', function () {
+                const file = this.files && this.files[0];
+                if (!file) return;
+                showPreview(file);
+            });
+
+            clearBtn.addEventListener('click', () => {
+                input.value = '';
+                img.src = '';
+                wrap.style.display = 'none';
+            });
+        })();
+    </script>
+}

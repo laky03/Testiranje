@@ -1,0 +1,67 @@
+﻿@model SplitSync.Models.AnketaGlasanjeViewModel
+
+@{
+    ViewData["Title"] = "Anketa";
+}
+
+<section class="app-hero">
+    <h1>Anketa: @Model.Naziv</h1>
+    <p>Ocenite svaku ponuđenu opciju (1–5), pa pošaljite svoj glas.</p>
+</section>
+
+<div class="app-card app-card-narrow">
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+            <div class="alert alert-danger">@Model.ErrorMessage</div>
+    }
+
+    <form method="post" asp-action="AnketaGlasanje" class="form-stacked">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="GrupaId" value="@Model.GrupaId" />
+        <input type="hidden" name="AnketaId" value="@Model.AnketaId" />
+
+        <div class="table-wrap">
+            <table class="bill-table edit">
+                <colgroup>
+                    <col />
+                    <col style="width: 360px" />
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>Opcija</th>
+                        <th>Ocena</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var o in Model.Opcije)
+                    {
+                        <tr>
+                            <td>@o.Naziv</td>
+                            <td>
+                                <div class="rating-set">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        var id = $"r_{o.OpcijaId}_{i}";
+                                            <label class="rating-pill" for="@id">
+                                                <input id="@id" type="radio" name="Ocene[@o.OpcijaId]" value="@i" />
+                                                <span>@i</span>
+                                            </label>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="form-actions">
+            <a class="btn" asp-controller="Group" asp-action="Ankete" asp-route-id="@Model.GrupaId">
+                <i class="bx bx-left-arrow-alt"></i> Otkaži
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="bx bx-send"></i> Pošalji glas
+            </button>
+        </div>
+    </form>
+</div>

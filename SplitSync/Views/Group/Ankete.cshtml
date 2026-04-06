@@ -1,0 +1,298 @@
+﻿@model SplitSync.Models.AnketeViewModel
+@{
+    ViewData["Title"] = "Ankete";
+    var gid = Model.GrupaId;
+    bool hasAny =
+        (Model.AnketeGlasanje?.Count ?? 0) > 0 ||
+        (Model.AnketeZaEdit?.Count ?? 0) > 0 ||
+        (Model.ZavrseneAnkete?.Count ?? 0) > 0 ||
+        (Model.AnketeUToku?.Count ?? 0) > 0;
+}
+
+<section class="app-hero">
+    <h1>Ankete</h1>
+    <p>Pregled i upravljanje anketama grupe.</p>
+</section>
+
+<div class="card-toolbar">
+    <div class="quick-links">
+        <a class="btn btn-primary" asp-controller="Group" asp-action="AnketaCreate" asp-route-grupaId="@gid">
+            <i class="bx bx-plus"></i> Kreiraj anketu
+        </a>
+        <a class="qlink" asp-controller="Group" asp-action="Index" asp-route-id="@gid">
+            <i class="bx bx-group"></i> Pregled grupe
+        </a>
+    </div>
+</div>
+
+@if (!hasAny)
+{
+        <div class="app-card">
+            <div class="empty-state">
+                <div class="empty-icon"><i class="bx bx-poll"></i></div>
+                <h3>Još uvek nema anketa</h3>
+                <p>Dodaj prvu anketu za brze odluke u grupi.</p>
+                <a class="btn btn-primary" asp-controller="Group" asp-action="AnketaCreate" asp-route-grupaId="@gid">
+                    <i class="bx bx-plus"></i> Nova anketa
+                </a>
+            </div>
+        </div>
+}
+
+@if ((Model.AnketeGlasanje?.Count ?? 0) > 0)
+{
+    <div class="app-card app-card-narrow mt-24">
+        <h2 class="mt-0">Ankete u kojima treba da glasate</h2>
+        <div class="table-wrap">
+            <table class="bill-table">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Naziv</th>
+                        <th>Br opcija</th>
+                        <th>Kreiran</th>
+                        <th style="width:260px;text-align:right;">Akcije</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var a in Model.AnketeGlasanje)
+                {
+                        <tr>
+                            <td>@a.Id</td>
+                            <td>@a.Naziv</td>
+                            <td>@a.BrojOpcija</td>
+                            <td>@a.CreatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                            <td class="t-right">
+                                <div class="table-actions">
+                                    <a class="btn btn-primary btn-sm"
+                                        asp-controller="Group" asp-action="AnketaGlasanje"
+                                        asp-route-grupaId="@gid" asp-route-anketaId="@a.Id">
+                                        <i class="bx bx-check-circle"></i> Glasaj
+                                    </a>
+                                @if (a.MozeDaObrise)
+                                {
+                                            <form asp-controller="Group" asp-action="DeleteAnketa" asp-route-grupaId="@gid" asp-route-anketaId="@a.Id" method="post">
+                                                <button class="btn btn-danger btn-sm" type="submit"><i class="bx bx-trash"></i> Obriši</button>
+                                            </form>
+                                }
+                                </div>
+                            </td>
+                        </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@if ((Model.AnketeZaEdit?.Count ?? 0) > 0)
+{
+    <div class="app-card app-card-narrow">
+        <h2 class="mt-0">Ankete u kojima možete da dodate opcije</h2>
+        <div class="table-wrap">
+            <table class="bill-table">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Naziv</th>
+                        <th>Br opcija</th>
+                        <th>Kreiran</th>
+                        <th style="width:260px;text-align:right;">Akcije</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model.AnketeZaEdit)
+                    {
+                        <tr>
+                            <td>@a.Id</td>
+                            <td>@a.Naziv</td>
+                            <td>@a.BrojOpcija</td>
+                            <td>@a.CreatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                            <td class="t-right">
+                                <div class="table-actions">
+                                    <a class="btn btn-primary btn-sm"
+                                        asp-controller="Group" asp-action="AnketaEdit"
+                                        asp-route-grupaId="@gid" asp-route-anketaId="@a.Id">
+                                        <i class="bx bx-edit"></i> Uredi
+                                    </a>
+                                @if (a.MozeDaObrise)
+                                {
+                                    <form asp-controller="Group" asp-action="DeleteAnketa" asp-route-grupaId="@gid" asp-route-anketaId="@a.Id" method="post">
+                                        <button class="btn btn-danger btn-sm" type="submit"><i class="bx bx-trash"></i> Obriši</button>
+                                    </form>
+                                }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@if ((Model.ZavrseneAnkete?.Count ?? 0) > 0)
+{
+    <div class="app-card app-card-narrow mt-24">
+        <h2 class="mt-0">Završene ankete</h2>
+        <div class="table-wrap">
+            <table class="bill-table">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Naziv</th>
+                        <th>Br opcija</th>
+                        <th>Kreiran</th>
+                        <th>Rezultati</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var a in Model.ZavrseneAnkete)
+                {
+                    var allResults = (a.Rezultati ?? Enumerable.Empty<dynamic>())
+                                        .OrderByDescending(r => r.ProsecnaOcena)
+                                        .ToList();
+                    var top3 = allResults.Take(3).ToList();
+                    var extraCount = Math.Max(0, allResults.Count - 3);
+                    var modalId = $"results-modal-{a.Id}";
+                        <tr>
+                            <td>@a.Id</td>
+                            <td>@a.Naziv</td>
+                            <td>@a.BrojOpcija</td>
+                            <td>@a.CreatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>
+                                <table class="mini-table">
+                                @foreach (var r in top3)
+                                {
+                                            <tr>
+                                                <td>@r.Naziv</td>
+                                                <td>@r.ProsecnaOcena.ToString("0.##")</td>
+                                            </tr>
+                                }
+                                </table>
+
+                            @if (extraCount > 0)
+                            {
+                                        <div class="results-more">
+                                            <span class="more-badge">+@extraCount više</span>
+                                            <button type="button" class="btn btn-secondary btn-sm" data-modal-open="@modalId">
+                                                <i class="bx bx-show"></i> Prikaži sve
+                                            </button>
+                                        </div>
+
+                                        <div id="@modalId" class="modal" aria-hidden="true" role="dialog" aria-label="Rezultati ankete @a.Naziv">
+                                            <div class="modal-overlay" data-modal-close></div>
+                                            <div class="modal-content app-card">
+                                                <div class="modal-header">
+                                                    <h3 class="mt-0">Rezultati: @a.Naziv</h3>
+                                                    <button type="button" class="btn-icon" aria-label="Zatvori" data-modal-close>
+                                                        <i class="bx bx-x"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="table-wrap">
+                                                    <table class="bill-table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Opcija</th>
+                                                                <th>Prosečna ocena</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                    @foreach (var r in allResults)
+                                                    {
+                                                                <tr>
+                                                                    <td>@r.Naziv</td>
+                                                                    <td class="t-right">@r.ProsecnaOcena.ToString("0.##")</td>
+                                                                </tr>
+                                                    }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button class="btn" type="button" data-modal-close>Zatvori</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                            }
+                            </td>
+                            <td class="t-right">
+                            @if (a.MozeDaObrise)
+                            {
+                                        <form asp-controller="Group" asp-action="DeleteAnketa" asp-route-grupaId="@gid" asp-route-anketaId="@a.Id" method="post">
+                                            <button class="btn btn-danger btn-sm" type="submit"><i class="bx bx-trash"></i> Obriši</button>
+                                        </form>
+                            }
+                            </td>
+                        </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@if ((Model.AnketeUToku?.Count ?? 0) > 0)
+{
+    <div class="app-card app-card-narrow mt-24">
+        <h2 class="mt-0">Ankete u toku</h2>
+        <div class="table-wrap">
+            <table class="bill-table">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Naziv</th>
+                        <th>Br opcija</th>
+                        <th>Kreiran</th>
+                        <th style="width:300px;text-align:right;">Akcije</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var a in Model.AnketeUToku)
+                {
+                        <tr>
+                            <td>@a.Id</td>
+                            <td>@a.Naziv</td>
+                            <td>@a.BrojOpcija</td>
+                            <td>@a.CreatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                            <td class="t-right">
+                            @if (a.MozeDaObrise)
+                            {
+                                        <div class="table-actions">
+                                            <form asp-controller="Group" asp-action="ZavrsiAnketuPrerano" asp-route-grupaId="@gid" asp-route-anketaId="@a.Id" method="post">
+                                                <button class="btn btn-sm" type="submit"><i class="bx bx-check-square"></i> Završi ranije</button>
+                                            </form>
+                                            <form asp-controller="Group" asp-action="DeleteAnketa" asp-route-grupaId="@gid" asp-route-anketaId="@a.Id" method="post">
+                                                <button class="btn btn-danger btn-sm" type="submit"><i class="bx bx-trash"></i> Obriši</button>
+                                            </form>
+                                        </div>
+                            }
+                            </td>
+                        </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+    document.addEventListener('click', function (e) {
+        const openBtn = e.target.closest('[data-modal-open]');
+        if (openBtn) {
+            const id = openBtn.getAttribute('data-modal-open');
+            const m = document.getElementById(id);
+            if (m) m.classList.add('open');
+        }
+        if (e.target.closest('[data-modal-close]')) {
+            const modal = e.target.closest('.modal');
+            if (modal) modal.classList.remove('open');
+        }
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal.open').forEach(m => m.classList.remove('open'));
+        }
+    });
+    </script>
+}

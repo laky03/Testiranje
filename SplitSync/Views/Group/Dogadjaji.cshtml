@@ -1,0 +1,407 @@
+﻿@model SplitSync.Models.DogadjajiViewModel
+@using SplitSync.Entities
+@{
+    ViewData["Title"] = "Događaji";
+}
+
+<section class="app-hero">
+    <h1>Događaji</h1>
+    <p>Pregledaj planove grupe, glasaj i vidi ko dolazi.</p>
+</section>
+
+<div class="app-card app-card-narrow">
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger">@Model.ErrorMessage</div>
+    }
+
+    <div class="card-toolbar">
+        <h3 class="mt-0">Lista događaja</h3>
+        <a class="btn btn-primary btn-sm"
+           asp-controller="Group"
+           asp-action="DogadjajCreate"
+           asp-route-grupaId="@Model.GrupaId">
+            <i class="bx bx-plus"></i> Novi događaj
+        </a>
+    </div>
+
+    @if (Model.Dogadjaji.Count == 0)
+    {
+        <div class="empty-state mt-16">Nema kreiranih događaja.</div>
+    }
+    else
+    {
+        <div id="dogadjaji-container" class="mt-16" style="display: flex; flex-direction: column; gap: 16px;">
+            @foreach (var d in Model.Dogadjaji)
+            {
+                <div class="event-card" data-id="@d.Id" data-utc="@d.VremeDogadjaja.ToUniversalTime().ToString("o")">
+                    <div class="event-header">
+                        <h3 class="event-title">@d.Naziv</h3>
+
+                        <div class="event-actions">
+                            @if (d.CanEdit)
+                            {
+                                <a class="btn btn-secondary btn-sm"
+                                   asp-controller="Group"
+                                   asp-action="DogadjajEdit"
+                                   asp-route-grupaId="@Model.GrupaId"
+                                   asp-route-dogadjajId="@d.Id">
+                                    <i class="bx bx-edit"></i> Uredi
+                                </a>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="event-meta">
+                        @if (d.CreatorNickname != null)
+                        {
+                            <span>Kreator: <strong>@d.CreatorNickname</strong> (@d.CreatorUsername)</span>
+                        }
+                        else
+                        {
+                            <span>Kreator: <strong>@d.CreatorUsername</strong></span>
+                        }
+                        <span>• Vreme događaja: @d.VremeDogadjaja.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                        @if (!string.IsNullOrWhiteSpace(d.Lokacija))
+                        {
+                            <span>• Lokacija: @d.Lokacija</span>
+                        }
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(d.Opis))
+                    {
+                        <p class="event-desc">@d.Opis</p>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(d.SlikaBase64))
+                    {
+                        <img class="event-img" src="data:image/*;base64,@d.SlikaBase64" alt="Slika događaja" />
+                    }
+
+                    <div class="vote-summary">
+                        <span class="badge primary">Ide: @d.Idu.Count</span>
+                        <span class="badge warning">Možda: @d.MozdaIdu.Count</span>
+                        <span class="badge danger">Ne ide: @d.NeIdu.Count</span>
+                    </div>
+
+                    <div class="vote-lists">
+                        @if (d.Idu.Count > 0)
+                        {
+                            <div class="user-list">
+                                <h4>Dolaze</h4>
+                                <ul>
+                                    @foreach (var user in d.Idu)
+                                    {
+                                        <li>@user</li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+                        @if (d.MozdaIdu.Count > 0)
+                        {
+                            <div class="user-list">
+                                <h4>Možda</h4>
+                                <ul>
+                                    @foreach (var user in d.MozdaIdu)
+                                    {
+                                        <li>@user</li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+                        @if (d.NeIdu.Count > 0)
+                        {
+                            <div class="user-list">
+                                <h4>Ne dolaze</h4>
+                                <ul>
+                                    @foreach (var user in d.NeIdu)
+                                    {
+                                        <li>@user</li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+                    </div>
+
+                    <form class="btn-group" asp-action="DogadjajGlasaj" asp-controller="Group" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="grupaId" value="@Model.GrupaId" />
+                        <input type="hidden" name="dogadjajId" value="@d.Id" />
+
+                        <button type="submit" name="glas" value="@GlasOptions.Ide" class="btn btn-primary btn-sm">
+                            <i class="bx bx-check"></i> Idem
+                        </button>
+                        <button type="submit" name="glas" value="@GlasOptions.Mozda" class="btn btn-secondary btn-sm">
+                            <i class="bx bx-help-circle"></i> Možda
+                        </button>
+                        <button type="submit" name="glas" value="@GlasOptions.NeIde" class="btn btn-danger btn-sm">
+                            <i class="bx bx-x"></i> Ne idem
+                        </button>
+
+                        @if (d.MojGlas != null)
+                        {
+                            <span class="my-vote">
+                                Tvoj glas:
+                                @if (d.MojGlas.Value == GlasOptions.NeIde)
+                                {
+                                    <strong>Ne idem</strong>
+                                }
+                                else if (d.MojGlas.Value == GlasOptions.Ide)
+                                {
+                                    <strong>Idem</strong>
+                                }
+                                else
+                                {
+                                    <strong>Možda</strong>
+                                }
+                            </span>
+                        }
+                    </form>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        (function(){
+            const container = document.getElementById('dogadjaji-container');
+            if (!container) return;
+
+            const groupId = @Model.GrupaId;
+            const currentUserId = @User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? 0;
+
+            if (window.__dogadjajiTimer) { clearInterval(window.__dogadjajiTimer); }
+            let inflight = null;
+            let lastUtc = null;
+
+            function formatDate(dateIso) {
+                try {
+                    const d = new Date(dateIso);
+                    return d.toLocaleString();
+                } catch {
+                    return '';
+                }
+            }
+
+            function createDogadjajNode(d) {
+                const root = document.createElement('div');
+                root.className = 'event-card';
+                root.dataset.id = String(d.id);
+                root.dataset.utc = d.vremeDogadjaja;
+
+                const header = document.createElement('div');
+                header.className = 'event-header';
+
+                const title = document.createElement('h3');
+                title.className = 'event-title';
+                title.textContent = d.naziv;
+
+                const actions = document.createElement('div');
+                actions.className = 'event-actions';
+                if (d.canEdit) {
+                    const editBtn = document.createElement('a');
+                    editBtn.className = 'btn btn-secondary btn-sm';
+                    editBtn.href = `/Group/DogadjajEdit?grupaId=${groupId}&dogadjajId=${d.id}`;
+                    editBtn.innerHTML = '<i class="bx bx-edit"></i> Uredi';
+                    actions.appendChild(editBtn);
+                }
+
+                header.appendChild(title);
+                header.appendChild(actions);
+
+                const meta = document.createElement('div');
+                meta.className = 'event-meta';
+
+                const creatorText = d.creatorNickname
+                    ? `Kreator: <strong>${d.creatorNickname}</strong> (${d.creatorUsername})`
+                    : `Kreator: <strong>${d.creatorUsername}</strong>`;
+                meta.innerHTML = `${creatorText} • Vreme događaja: ${formatDate(d.vremeDogadjaja)}${d.lokacija ? ` • Lokacija: ${d.lokacija}` : ''}`;
+
+                root.appendChild(header);
+                root.appendChild(meta);
+
+                if (d.opis) {
+                    const desc = document.createElement('p');
+                    desc.className = 'event-desc';
+                    desc.textContent = d.opis;
+                    root.appendChild(desc);
+                }
+
+                if (d.slikaBase64) {
+                    const img = document.createElement('img');
+                    img.className = 'event-img';
+                    img.src = `data:image/*;base64,${d.slikaBase64}`;
+                    img.alt = 'Slika događaja';
+                    root.appendChild(img);
+                }
+
+                const voteSummary = document.createElement('div');
+                voteSummary.className = 'vote-summary';
+                voteSummary.innerHTML = `
+                    <span class="badge primary">Ide: ${d.idu.length}</span>
+                    <span class="badge warning">Možda: ${d.mozdaIdu.length}</span>
+                    <span class="badge danger">Ne ide: ${d.neIdu.length}</span>
+                `;
+                root.appendChild(voteSummary);
+
+                const voteLists = document.createElement('div');
+                voteLists.className = 'vote-lists';
+
+                if (d.idu.length > 0) {
+                    const ideDiv = document.createElement('div');
+                    ideDiv.className = 'user-list';
+                    ideDiv.innerHTML = `<h4>Dolaze</h4><ul>${d.idu.map(u => `<li>${u}</li>`).join('')}</ul>`;
+                    voteLists.appendChild(ideDiv);
+                }
+
+                if (d.mozdaIdu.length > 0) {
+                    const mozdaDiv = document.createElement('div');
+                    mozdaDiv.className = 'user-list';
+                    mozdaDiv.innerHTML = `<h4>Možda</h4><ul>${d.mozdaIdu.map(u => `<li>${u}</li>`).join('')}</ul>`;
+                    voteLists.appendChild(mozdaDiv);
+                }
+
+                if (d.neIdu.length > 0) {
+                    const neIdeDiv = document.createElement('div');
+                    neIdeDiv.className = 'user-list';
+                    neIdeDiv.innerHTML = `<h4>Ne dolaze</h4><ul>${d.neIdu.map(u => `<li>${u}</li>`).join('')}</ul>`;
+                    voteLists.appendChild(neIdeDiv);
+                }
+
+                root.appendChild(voteLists);
+
+                const form = document.createElement('form');
+                form.className = 'btn-group';
+                form.action = '/Group/DogadjajGlasaj';
+                form.method = 'post';
+
+                const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (csrfToken) {
+                    const csrfInput = document.createElement('input');
+                    csrfInput.type = 'hidden';
+                    csrfInput.name = '__RequestVerificationToken';
+                    csrfInput.value = csrfToken.value;
+                    form.appendChild(csrfInput);
+                }
+
+                const grupaIdInput = document.createElement('input');
+                grupaIdInput.type = 'hidden';
+                grupaIdInput.name = 'grupaId';
+                grupaIdInput.value = groupId;
+                form.appendChild(grupaIdInput);
+
+                const dogadjajIdInput = document.createElement('input');
+                dogadjajIdInput.type = 'hidden';
+                dogadjajIdInput.name = 'dogadjajId';
+                dogadjajIdInput.value = d.id;
+                form.appendChild(dogadjajIdInput);
+
+                const ideBtn = document.createElement('button');
+                ideBtn.type = 'submit';
+                ideBtn.name = 'glas';
+                ideBtn.value = 'Ide';
+                ideBtn.className = 'btn btn-primary btn-sm';
+                ideBtn.innerHTML = '<i class="bx bx-check"></i> Idem';
+                form.appendChild(ideBtn);
+
+                const mozdaBtn = document.createElement('button');
+                mozdaBtn.type = 'submit';
+                mozdaBtn.name = 'glas';
+                mozdaBtn.value = 'Mozda';
+                mozdaBtn.className = 'btn btn-secondary btn-sm';
+                mozdaBtn.innerHTML = '<i class="bx bx-help-circle"></i> Možda';
+                form.appendChild(mozdaBtn);
+
+                const neIdeBtn = document.createElement('button');
+                neIdeBtn.type = 'submit';
+                neIdeBtn.name = 'glas';
+                neIdeBtn.value = 'NeIde';
+                neIdeBtn.className = 'btn btn-danger btn-sm';
+                neIdeBtn.innerHTML = '<i class="bx bx-x"></i> Ne idem';
+                form.appendChild(neIdeBtn);
+
+                if (d.mojGlas) {
+                    const myVote = document.createElement('span');
+                    myVote.className = 'my-vote';
+                    myVote.innerHTML = `Tvoj glas: <strong>${d.mojGlas}</strong>`;
+                    form.appendChild(myVote);
+                }
+
+                root.appendChild(form);
+
+                return root;
+            }
+
+            function initLast() {
+                const items = container.querySelectorAll('.event-card');
+                if (!items.length) return;
+                const first = items[0];
+                lastUtc = first.dataset.utc || null;
+            }
+
+            initLast();
+
+            async function tick() {
+                try {
+                    if (inflight) { inflight.abort(); inflight = null; }
+                    inflight = new AbortController();
+
+                    let url = `/api/novi-dogadjaji?groupId=${encodeURIComponent(groupId)}`;
+                    if (lastUtc) {
+                        const back1s = new Date(new Date(lastUtc).getTime() - 1000).toISOString();
+                        url += `&odUtc=${encodeURIComponent(back1s)}`;
+                    }
+
+                    const res = await fetch(url, {
+                        headers: { 'Accept': 'application/json' },
+                        cache: 'no-store',
+                        signal: inflight.signal,
+                    });
+                    if (!res.ok) return;
+
+                    const list = await res.json();
+                    if (!Array.isArray(list) || list.length === 0) return;
+
+                    const seen = new Set([...container.querySelectorAll('.event-card')].map(n => n.dataset.id));
+                    const frag = document.createDocumentFragment();
+                    let prepended = 0;
+
+                    for (const d of list) {
+                        const idStr = String(d.id);
+                        if (seen.has(idStr)) continue;
+                        frag.appendChild(createDogadjajNode(d));
+                        lastUtc = d.vremeDogadjaja;
+                        prepended++;
+                    }
+
+                    if (prepended) {
+                        container.insertBefore(frag, container.firstChild);
+                    }
+                } catch(e) {
+                } finally {
+                    inflight = null;
+                }
+            }
+
+            window.__dogadjajiTimer = setInterval(tick, 10000);
+
+            tick();
+
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    if (window.__dogadjajiTimer) {
+                        clearInterval(window.__dogadjajiTimer);
+                        window.__dogadjajiTimer = null;
+                    }
+                } else {
+                    if (!window.__dogadjajiTimer) {
+                        window.__dogadjajiTimer = setInterval(tick, 10000);
+                        tick();
+                    }
+                }
+            });
+        })();
+    </script>
+}

@@ -1,0 +1,43 @@
+﻿@model SplitSync.Models.AccountVerifyViewModel
+@{
+    ViewData["Title"] = "Verify Email";
+}
+<div class="auth2 container forms forms-single">
+    <section class="form signup">
+        <header>Verifikacija</header>
+
+        <p class="desc">
+            Unesite verifikacioni kod koji smo poslali na
+            <b>@Model?.Email</b>. Kod važi 15 minuta.
+        </p>
+
+        @if (!string.IsNullOrWhiteSpace(Model?.ErrorMessage))
+        {
+            <div class="auth2-alert error">@Model.ErrorMessage</div>
+        }
+
+        <form asp-controller="Account" asp-action="Verify" method="post" novalidate>
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" name="Email" value="@Model?.Email" />
+
+            <div class="field">
+                <input type="text"
+                       name="Code"
+                       value="@Model?.Code"
+                       inputmode="numeric"
+                       pattern="[0-9]*"
+                       class="code-input"
+                       autocomplete="one-time-code" />
+            </div>
+
+            <div class="field">
+                <button type="submit">Potvrdi</button>
+            </div>
+
+            <div class="form-link">
+                Već imate nalog? <a asp-controller="Account" asp-action="Login">Prijava</a>
+            </div>
+        </form>
+    </section>
+</div>

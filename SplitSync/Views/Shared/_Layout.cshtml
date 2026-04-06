@@ -1,0 +1,170 @@
+﻿@{
+    string controller = "", action = "";
+    if((string?)ViewContext.RouteData.Values["controller"] != null && (string?)ViewContext.RouteData.Values["action"] != null) {
+        controller = (string?)ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+        action = (string?)ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    }
+    long grupaId = ViewData["TrenutnaGrupaId"] as long? ?? 0;
+    string? grupaNaziv = ViewData["TrenutnaGrupaNaziv"] as string;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - SplitSync</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+    @await RenderSectionAsync("Styles", required: false)
+    <link href='https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css' rel='stylesheet'>
+
+</head>
+    <body>
+        @if (User?.Identity?.IsAuthenticated ?? false) 
+        {
+            <nav class="app-nav">
+                <div class="app-left">
+                    <i class="bx bx-menu app-menu-icon" aria-label="Menu" role="button" tabindex="0"></i>
+                    <a asp-controller="Home" asp-action="Index" class="app-brand">SplitSync</a>
+                </div>
+
+                <div class="app-right">
+                    <a asp-controller="Account" asp-action="Edit" class="app-profile" title="Profil">
+                        <img id="appAvatar" class="app-avatar" alt="Profil" style="display:none;" />
+                        <i id="appProfileIcon" class="bx bx-user-circle"></i>
+                    </a>
+                </div>
+
+                <aside class="app-sidebar">
+                    <div class="app-sidebar-wrapper">
+                        <div class="app-sidebar-header">
+                            <i class="bx bx-menu app-menu-icon" aria-label="Zatvori"></i>
+                            <span class="app-brand">Meni</span>
+                        </div>
+
+                        <nav class="app-sidebar-content">
+                            <ul class="app-lists">
+                                <li class="app-list">
+                                    <a asp-controller="Home" asp-action="Index"
+                                       class="app-nav-link @(controller == "Home" ? "is-active" : "")">
+                                        <i class='bx bx-home app-icon'></i>
+                                        <span class="app-link">Početna</span>
+                                    </a>
+                                </li>
+
+                                <li class="app-list">
+                                    <a asp-controller="Groups" asp-action="Index"
+                                       class="app-nav-link @(controller == "Groups" ? "is-active" : "")">
+                                        <i class='bx bx-group app-icon'></i>
+                                        <span class="app-link">Grupe</span>
+                                    </a>
+                                </li>
+
+                                @if(controller == "Group") 
+                                {
+                                    <li class="app-list">
+                                        <span class="app-link">@grupaNaziv</span>
+                                    </li>
+                                    <li class="app-list">
+                                        <a asp-controller="Group" asp-action="Index" asp-route-id="@grupaId"
+                                           class="app-nav-link @((controller == "Group" && action == "Index") ? "is-active" : "") app-nav-link-group">
+                                            <i class='bx bx-group app-icon'></i>
+                                            <span class="app-link">Pocetna</span>
+                                        </a>
+                                    </li>
+                                    <li class="app-list">
+                                        <a asp-controller="Group" asp-action="Racuni" asp-route-id="@grupaId"
+                                           class="app-nav-link @((controller == "Group" && (action == "Racuni" || action == "NoviRacun")) ? "is-active" : "") app-nav-link-group">
+                                            <i class='bx bx-money app-icon'></i>
+                                            <span class="app-link">Racuni</span>
+                                        </a>
+                                    </li>
+                                    <li class="app-list">
+                                        <a asp-controller="Group" asp-action="PredlogUplata" asp-route-id="@grupaId"
+                                           class="app-nav-link @((controller == "Group" && action == "PredlogUplata") ? "is-active" : "") app-nav-link-group">
+                                            <i class='bx bx-money app-icon'></i>
+                                            <span class="app-link">Predlog uplata</span>
+                                        </a>
+                                    </li>
+                                    <li class="app-list">
+                                        <a asp-controller="Group" asp-action="Ankete" asp-route-id="@grupaId"
+                                           class="app-nav-link @((controller == "Group" && (action == "Ankete" || action == "AnketaCreate" || action == "AnketaEdit" || action == "AnketaGlasanje")) ? "is-active" : "") app-nav-link-group">
+                                            <i class='bx bx-poll app-icon'></i>
+                                            <span class="app-link">Ankete</span>
+                                        </a>
+                                    </li>
+                                    <li class="app-list">
+                                        <a asp-controller="Group" asp-action="Dogadjaji" asp-route-id="@grupaId"
+                                           class="app-nav-link @((controller == "Group" && (action == "Dogadjaji" || action == "DogadjajiCreate" || action == "DogadjajiEdit")) ? "is-active" : "") app-nav-link-group">
+                                            <i class='bx bx-calendar-event app-icon'></i>
+                                            <span class="app-link">Dogadjaji</span>
+                                        </a>
+                                    </li>
+                                    <li class="app-list">
+                                        <a asp-controller="Group" asp-action="ShoppingLista" asp-route-id="@grupaId"
+                                           class="app-nav-link @((controller == "Group" && action == "ShoppingLista") ? "is-active" : "") app-nav-link-group">
+                                            <i class='bx bx-cart app-icon'></i>
+                                            <span class="app-link">Shopping lista</span>
+                                        </a>
+                                    </li>
+                                    <li class="app-list">
+                                        <a asp-controller="Group" asp-action="Chat" asp-route-id="@grupaId"
+                                           class="app-nav-link @((controller == "Group" && action == "Chat") ? "is-active" : "") app-nav-link-group">
+                                            <i class='bx bx-chat app-icon'></i>
+                                            <span class="app-link">Chat</span>
+                                        </a>
+                                    </li>
+                                    <li class="app-list">
+                                        <a asp-controller="Group" asp-action="Settings" asp-route-grupaId="@grupaId"
+                                           class="app-nav-link @((controller == "Group" && action == "Settings") ? "is-active" : "") app-nav-link-group">
+                                            <i class='bx bx-cog app-icon'></i>
+                                            <span class="app-link">Podešavanja</span>
+                                        </a>
+                                    </li>
+                                }
+
+                                <li class="app-list" style = "justify-content: flex-end;">
+                                    <a href="#" class="app-nav-link"
+                                        onclick="document.getElementById('logoutForm').submit(); return false;">
+                                        <i class='bx bx-log-out app-icon'></i>
+                                        <span class="app-link">Logout</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+
+                        <form id="logoutForm" asp-controller="Account" asp-action="Logout" method="post" style="display:none"></form>
+                    </div>
+                </aside>
+
+            </nav>
+
+            <div class="app-overlay"></div>
+
+            <main class="app-main">
+                @RenderBody()
+            </main>
+        }
+        else
+        {
+            @RenderBody()
+        }
+
+    
+
+        <script>
+            const navBar = document.querySelector(".app-nav"),
+                  menuBtns = document.querySelectorAll(".app-menu-icon"),
+                  overlay = document.querySelector(".app-overlay");
+            menuBtns.forEach(btn => btn.addEventListener("click", () => navBar.classList.toggle("open")));
+            overlay.addEventListener("click", () => navBar.classList.remove("open"));
+
+            const imgEl = document.getElementById('appAvatar');
+            const iconEl = document.getElementById('appProfileIcon');
+            imgEl.src = '/api/profile-image';
+            imgEl.onload = () => { iconEl.style.display = 'none'; imgEl.style.display = 'inline-block'; };
+            imgEl.onerror = () => { imgEl.style.display = 'none'; iconEl.style.display = ''; };
+        </script>
+
+        @await RenderSectionAsync("Scripts", required: false)
+    </body>
+</html>

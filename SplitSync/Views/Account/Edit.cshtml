@@ -1,0 +1,120 @@
+﻿@model SplitSync.Models.AccountEditViewModel
+@{
+    ViewData["Title"] = "Izmena naloga";
+}
+
+<div class="app-card account-edit">
+    <h2 class="mt-0">Podešavanja naloga</h2>
+
+    @if (!string.IsNullOrWhiteSpace(Model?.SuccessMessage))
+    {
+        <div class="app-alert success mb-10" role="status">
+            <i class="ri-check-line"></i>
+            <span>@Model.SuccessMessage</span>
+        </div>
+    }
+    @if (!string.IsNullOrWhiteSpace(Model?.ErrorMessage))
+    {
+        <div class="app-alert error mb-10" role="alert">
+            <i class="ri-error-warning-line"></i>
+            <span>@Model.ErrorMessage</span>
+        </div>
+    }
+
+    <form asp-action="Edit" asp-controller="Account" method="post" enctype="multipart/form-data" class="profile-grid">
+        @Html.AntiForgeryToken()
+
+        <div class="profile-col">
+
+            <div class="row-inline">
+                <div class="form-field">
+                    <label for="FirstName">Ime</label>
+                    <input id="FirstName" class="input" type="text" name="FirstName" value="@(Model?.FirstName ?? "")" />
+                </div>
+                <div class="form-field grow">
+                    <label for="LastName">Prezime</label>
+                    <input id="LastName" class="input" type="text" name="LastName" value="@(Model?.LastName ?? "")" />
+                </div>
+            </div>
+
+            <div class="row-inline">
+                <div class="form-field grow">
+                    <label for="Username">Korisničko ime</label>
+                    <input id="Username" class="input" type="text" name="Username" value="@(Model?.Username ?? "")" />
+                </div>
+                <div class="form-field grow">
+                    <label for="Email">Email</label>
+                    <input id="Email" class="input" type="email" name="Email" value="@(Model?.Email ?? "")" />
+                </div>
+            </div>
+
+            <div class="card-subtitle">Promena lozinke</div>
+
+            <div class="row-inline pw-row">
+                <div class="field input-field grow">
+                    <label for="CurrentPassword">Trenutna lozinka</label>
+                    <input id="CurrentPassword" name="CurrentPassword" class="input" type="password" autocomplete="current-password" />
+                    <i class='bx bx-hide eye-icon' aria-hidden="true"></i>
+                </div>
+
+                <div class="field input-field grow">
+                    <label for="NewPassword">Nova lozinka</label>
+                    <input id="NewPassword" name="NewPassword" class="input" type="password" autocomplete="new-password" />
+                    <i class='bx bx-hide eye-icon' aria-hidden="true"></i>
+                </div>
+
+                <div class="field input-field grow">
+                    <label for="ConfirmNewPassword">Potvrda nove</label>
+                    <input id="ConfirmNewPassword" name="ConfirmNewPassword" class="input" type="password" autocomplete="new-password" />
+                    <i class='bx bx-hide eye-icon' aria-hidden="true"></i>
+                </div>
+            </div>
+        </div>
+        <div class="profile-col">
+            <div class="avatar-card">
+                <div class="avatar-preview">
+                    @if (!string.IsNullOrEmpty(Model?.OldPictureBase64))
+                    {
+                        <img id="avatarImg" src="data:image/png;base64,@Model.OldPictureBase64" alt="Profilna slika" />
+                    }
+                    else
+                    {
+                        <div class="avatar-fallback" id="avatarFallback" aria-hidden="true">
+                            <i class="ri-user-3-line"></i>
+                        </div>
+                        <img id="avatarImg" style="display:none" alt="Profilna slika" />
+                    }
+                </div>
+
+                <div class="upload-dropzone mt-8">
+                    <label for="NovaSlika" class="dz-label">
+                        <i class="ri-image-add-line"></i>
+                        <span class="dz-text">
+                            <strong>Promeni sliku</strong> – prevuci ili
+                            <span class="dz-link">odaberi fajl</span>
+                        </span>
+                    </label>
+                    <input class="dz-input" type="file" name="NovaSlika" id="NovaSlika" accept="image/*" />
+                </div>
+
+                <div class="upload-preview" id="avatarPreview" style="display:none">
+                    <img alt="Preview" />
+                </div>
+            </div>
+        </div>
+        <div class="form-footer">
+            <button class="btn btn-primary" type="submit">
+                <i class="ri-save-3-line"></i> Sačuvaj izmene
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Styles {
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+}
+
+@section Scripts {
+    <script src="~/js/auth.js" asp-append-version="true"></script>
+}

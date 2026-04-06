@@ -1,0 +1,233 @@
+﻿@model SplitSync.Models.ChatViewModel
+@{
+    ViewData["Title"] = "Chat";
+    var grupaId = Model.GrupaId;
+    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+}
+
+<div class="chat-wrap app-card"
+     data-group-id="@grupaId"
+     data-current-user-id="@currentUserId">
+
+    <div class="chat-head">
+        <div class="chat-title">
+            <i class="ri-chat-3-line"></i>
+            <span>Chat</span>
+        </div>
+        <a class="btn btn-secondary" asp-action="Index" asp-route-id="@grupaId">
+            <i class="ri-arrow-left-line"></i>Nazad na grupu
+        </a>
+    </div>
+
+    <div id="chat-stream" class="chat-window">
+        @foreach (var m in Model.Poruke.OrderBy(p => p.SentAtUtc))
+        {
+            var isMe = (currentUserId != null && long.TryParse(currentUserId, out var meId) && meId == m.SentById);
+            var ui = Model.UserInfo.FirstOrDefault(u => u.UserId == m.SentById);
+            var displayName = ui?.Nickname ?? ui?.Username ?? "Korisnik";
+            var avatar = ui?.Base64Image != null
+            ? $"data:image/png;base64,{ui.Base64Image}"
+            : null;
+
+                <div class="msg @(isMe ? "me" : "you")" data-id="@m.Id" data-utc="@m.SentAtUtc.ToUniversalTime().ToString("o")">
+                    <div class="avatar">
+                    @if (!string.IsNullOrEmpty(avatar))
+                    {
+                                <img src="@avatar" alt="@displayName" />
+                    }
+                    else
+                    {
+                                <div class="avatar-fallback">@((displayName?.FirstOrDefault() ?? 'U').ToString().ToUpper())</div>
+                    }
+                    </div>
+                    <div class="bubble">
+                        <div class="meta">
+                            <span class="name">@displayName</span>
+                            <span class="time" data-ts="@m.SentAtUtc.ToUniversalTime().ToString("o")"></span>
+                        </div>
+                        <div class="text">@m.Poruka</div>
+                    </div>
+                </div>
+        }
+    </div>
+
+    <form id="chat-send" class="chat-send" method="post" action="@Url.Action("PosaljiPoruku", "Group")">
+        <input type="hidden" name="grupaId" value="@grupaId" />
+        <input class="input" name="poruka" id="msgInput" placeholder="Ukucaj poruku…" autocomplete="off" />
+        <button type="submit" class="btn btn-primary">
+            <i class="ri-send-plane-2-line"></i> Pošalji
+        </button>
+    </form>
+</div>
+
+@section Scripts {
+        <script>
+            window.__chatUserInfo = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+            Model.UserInfo.ToDictionary(
+                u => u.UserId,
+                u => new
+                {
+                    nickname = u.Nickname,
+                    username = u.Username,
+                    base64 = u.Base64Image != null ? $"data:image/png;base64,{u.Base64Image}" : null
+                }
+            )
+        ));
+        </script>
+
+        <script>
+            (function(){
+              const wrap   = document.querySelector('.chat-wrap');
+              if (!wrap) return; 
+              const stream = document.getElementById('chat-stream');
+              const form   = document.getElementById('chat-send');
+              const input  = document.getElementById('msgInput');
+
+              const groupId   = wrap.dataset.groupId;
+              const currentId = wrap.dataset.currentUserId;
+
+              if (window.__chatTimer) { clearInterval(window.__chatTimer); }
+              let inflight = null;          
+              let lastUtc  = null;         
+              let lastId   = null;          
+
+              function scrollToBottom(force=false){
+                const nearBottom = (stream.scrollHeight - stream.scrollTop - stream.clientHeight) < 60;
+                if (nearBottom || force) { stream.scrollTop = stream.scrollHeight; }
+              }
+              function fmt(tsIso){
+                try { const d = new Date(tsIso); return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }
+                catch { return ''; }
+              }
+              function nowIso(){ return new Date().toISOString(); }
+
+              const userInfo = window.__chatUserInfo || {};
+
+              function createMsgNode(m){
+                const isMe = (currentId && String(m.sentById) === String(currentId));
+                const u = userInfo[m.sentById] || {};
+                const displayName = u.nickname || u.username || 'Korisnik';
+                const avatar = u.base64 || null;
+
+                const root = document.createElement('div');
+                root.className = 'msg ' + (isMe ? 'me' : 'you');
+                root.dataset.id  = String(m.id);
+                root.dataset.utc = m.sentAtUtc;
+
+                const av = document.createElement('div');
+                av.className = 'avatar';
+                if (avatar){
+                  const img = document.createElement('img'); img.src = avatar; img.alt = displayName; av.appendChild(img);
+                } else {
+                  const fb = document.createElement('div'); fb.className = 'avatar-fallback';
+                  fb.textContent = (displayName||'U').charAt(0).toUpperCase();
+                  av.appendChild(fb);
+                }
+
+                const bub = document.createElement('div');
+                bub.className = 'bubble';
+
+                const meta = document.createElement('div'); meta.className = 'meta';
+                const nm = document.createElement('span'); nm.className='name'; nm.textContent = displayName;
+                const tm = document.createElement('span'); tm.className='time'; tm.textContent = fmt(m.sentAtUtc);
+                meta.appendChild(nm); meta.appendChild(tm);
+
+                const txt = document.createElement('div'); txt.className='text'; txt.textContent = m.poruka;
+
+                bub.appendChild(meta); bub.appendChild(txt);
+                root.appendChild(av); root.appendChild(bub);
+                return root;
+              }
+
+              (function initLast(){
+                const items = stream.querySelectorAll('.msg');
+                if (!items.length) return;
+                const last = items[items.length-1];
+                lastUtc = last.dataset.utc || null;
+                lastId  = last.dataset.id  || null;
+                stream.querySelectorAll('.time').forEach(t=>{
+                  if (!t.textContent && t.dataset.ts) t.textContent = fmt(t.dataset.ts);
+                });
+                scrollToBottom(true);
+              })();
+
+              async function tick(){
+                try {
+                  if (inflight) { inflight.abort(); inflight = null; }
+                  inflight = new AbortController();
+
+                  let url = `/api/nove-poruke?groupId=${encodeURIComponent(groupId)}`;
+                  if (lastUtc) {
+                    const back1s = new Date(new Date(lastUtc).getTime() - 1000).toISOString();
+                    url += `&odUtc=${encodeURIComponent(back1s)}`;
+                  }
+
+                  const res = await fetch(url, {
+                    headers: { 'Accept': 'application/json' },
+                    cache: 'no-store',
+                    signal: inflight.signal,
+                  });
+                  if (!res.ok) return;
+
+                  const list = await res.json();
+                  if (!Array.isArray(list) || list.length === 0) return;
+
+                  const seen = new Set([...stream.querySelectorAll('.msg')].map(n => n.dataset.id));
+                  const frag = document.createDocumentFragment();
+                  let appended = 0;
+
+                  for (const m of list) {
+                    const idStr = String(m.id);
+                    if (seen.has(idStr)) continue;
+                    frag.appendChild(createMsgNode(m));
+                    lastUtc = m.sentAtUtc;   
+                    lastId  = idStr;
+                    appended++;
+                  }
+
+                  if (appended){
+                    stream.appendChild(frag);
+                    scrollToBottom(); 
+                  }
+                } catch(e) {
+                } finally {
+                  inflight = null;
+                }
+              }
+
+              window.__chatTimer = setInterval(tick, 2000);
+
+              tick();
+
+              form?.addEventListener('submit', async (e)=>{
+                e.preventDefault();
+                const text = (input.value || '').trim();
+                if (!text) return;
+
+                form.querySelector('button[type="submit"]').disabled = true;
+                try {
+                  await fetch(form.action, {
+                    method: 'POST',
+                    headers: { 'Content-Type':'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ grupaId: wrap.dataset.groupId, poruka: text }),
+                    cache: 'no-store'
+                  });
+                  input.value = '';
+                  await tick();
+                } catch(e) {
+                } finally {
+                  form.querySelector('button[type="submit"]').disabled = false;
+                  input.focus();
+                }
+              });
+              document.addEventListener('visibilitychange', ()=>{
+                if (document.hidden) {
+                  if (window.__chatTimer) { clearInterval(window.__chatTimer); window.__chatTimer = null; }
+                } else {
+                  if (!window.__chatTimer) { window.__chatTimer = setInterval(tick, 2000); tick(); }
+                }
+              });
+            })();
+        </script>
+}
+

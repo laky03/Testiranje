@@ -1,0 +1,82 @@
+﻿@model SplitSync.Models.PredlogUplataViewModel
+@{
+    ViewData["Title"] = "Predlog uplata";
+    var grupaId = (long?)ViewData["TrenutnaGrupaId"];
+    var grupaNaziv = (string?)ViewData["TrenutnaGrupaNaziv"] ?? "Grupa";
+}
+
+<section class="app-hero">
+    <h1>Predlog uplata</h1>
+    <p>Automatski obračun ko kome uplaćuje u „@grupaNaziv”.</p>
+</section>
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+        <div class="app-card">
+            <div class="app-alert error"><i class="bx bx-error-circle"></i> @Model.ErrorMessage</div>
+            <div class="quick-links" style="margin-top:10px">
+                <a class="qlink" asp-controller="Group" asp-action="Racuni" asp-route-id="@grupaId"><i class="bx bx-receipt"></i> Računi</a>
+                <a class="qlink" asp-controller="Group" asp-action="Index" asp-route-id="@grupaId"><i class="bx bx-group"></i> Pregled grupe</a>
+            </div>
+        </div>
+}
+else if (Model.PredlogUplata == null || Model.PredlogUplata.Count == 0)
+{
+        <div class="app-card">
+            <div class="empty-state">
+                <div class="empty-icon"><i class="bx bx-transfer-alt"></i></div>
+                <h3>Nema predloga uplata</h3>
+                <p>Trenutno je sve izravnato – nema preporučenih prebacivanja.</p>
+                <div class="quick-links">
+                    <a class="qlink" asp-controller="Group" asp-action="Racuni" asp-route-id="@grupaId"><i class="bx bx-receipt"></i> Računi</a>
+                    <a class="qlink" asp-controller="Home" asp-action="Index"><i class="bx bx-home"></i> Početna</a>
+                </div>
+            </div>
+        </div>
+}
+else
+{
+        <div class="app-card app-card-narrow">
+            <div class="card-toolbar">
+                <h2 class="mt-0">Predložene transakcije</h2>
+                <div class="quick-links">
+                    <a class="qlink" asp-controller="Group" asp-action="Racuni" asp-route-id="@grupaId"><i class="bx bx-receipt"></i> Računi</a>
+                    <a class="qlink" asp-controller="Group" asp-action="Index" asp-route-id="@grupaId"><i class="bx bx-group"></i> Pregled grupe</a>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table class="bill-table suggest-table">
+                    <thead>
+                        <tr>
+                            <th>Uplaćuje</th>
+                            <th>Korisniku</th>
+                            <th style="width:140px; text-align:right;">Iznos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var p in Model.PredlogUplata)
+                    {
+                            <tr>
+                                <td>
+                                    <div class="user-cell">
+                                        <span class="user-name">@(!string.IsNullOrWhiteSpace(p.SenderNickname) ? p.SenderNickname : p.SenderUsername)</span>
+                                        <span class="user-username">@p.SenderUsername</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="user-cell">
+                                        <span class="user-name">@(!string.IsNullOrWhiteSpace(p.RecieverNickname) ? p.RecieverNickname : p.RecieverUsername)</span>
+                                        <span class="user-username">@p.RecieverUsername</span>
+                                    </div>
+                                </td>
+                                <td class="t-right">
+                                    <span class="amount-chip amount-strong">@p.Iznos.ToString("0.##")</span>
+                                </td>
+                            </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+}

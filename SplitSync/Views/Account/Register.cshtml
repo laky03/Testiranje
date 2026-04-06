@@ -1,0 +1,75 @@
+﻿@model SplitSync.Models.AccountRegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+}
+@section Styles {
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/[email protected]/css/boxicons.min.css" rel="stylesheet">
+}
+
+<section class="auth2 container forms forms-single">
+    <div class="form signup">
+        <div class="form-content">
+            <header>Registracija</header>
+
+            @if (!string.IsNullOrWhiteSpace(Model?.ErrorMessage))
+            {
+                <div class="auth2-alert error">@Model.ErrorMessage</div>
+            }
+
+            <form asp-action="Register" asp-controller="Account" method="post" novalidate>
+                @Html.AntiForgeryToken()
+
+                <div class="grid-2">
+                    <div class="field input-field">
+                        <input class="input" asp-for="FirstName" placeholder="Ime" required />
+                    </div>
+                    <div class="field input-field">
+                        <input class="input" asp-for="LastName" placeholder="Prezime" required />
+                    </div>
+                </div>
+
+                <div class="field input-field">
+                    <input class="input" asp-for="Username" placeholder="Korisničko ime" required />
+                </div>
+
+                <div class="field input-field">
+                    <input class="input" asp-for="Email" type="email" placeholder="Email" required />
+                </div>
+
+                <div class="field input-field">
+                    <input class="input" asp-for="Password" type="password" placeholder="Lozinka" required />
+                    <i class='bx bx-hide eye-icon' aria-hidden="true"></i>
+                </div>
+
+                <div class="field input-field">
+                    <input class="input" asp-for="ConfirmPassword" type="password" placeholder="Potvrdi lozinku" required />
+                    <i class='bx bx-hide eye-icon' aria-hidden="true"></i>
+                </div>
+
+                <div class="field button-field">
+                    <button type="submit">Kreiraj nalog</button>
+                </div>
+            </form>
+
+            <div class="form-link">
+                <span>
+                    Već imaš nalog?
+                    <a class="link" href="@Url.Action("Login", "Account")">Prijava</a>
+                </span>
+            </div>
+        </div>
+
+        <div class="line"></div>
+
+        <div class="media-options">
+            <a href="/GoogleAuth/Start" class="field google">
+                <img src="~/images/google.png" alt="Google" class="google-img">
+                <span>Nastavi sa Google-om</span>
+            </a>
+        </div>
+    </div>
+</section>
+@section Scripts {
+    <script src="~/js/auth.js" asp-append-version="true"></script>
+}

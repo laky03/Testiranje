@@ -1,0 +1,125 @@
+﻿@model SplitSync.Models.AnketaEditViewModel
+
+@{
+    ViewData["Title"] = "Edit ankete";
+}
+
+<section class="app-hero">
+    <h1>Edit ankete</h1>
+    <p>Izmeni naziv, dodaj/obriši opcije i pokreni ili završi anketu.</p>
+</section>
+
+<div class="app-card app-card-narrow">
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+            <div class="app-alert error">@Model.ErrorMessage</div>
+    }
+
+    <form method="post" asp-action="UpdateAnketaNaziv" class="form-stacked anketa-name-form">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="GrupaId" value="@Model.GrupaId" />
+        <input type="hidden" name="AnketaId" value="@Model.AnketaId" />
+
+        <div class="form-field stretch">
+            <label class="form-label">Naziv</label>
+            <input type="text" name="Naziv" value="@Model.Naziv" class="input input-full" placeholder="npr. Film za veče" autocomplete="off" />
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="bx bx-save"></i> Sačuvaj naziv
+            </button>
+            <a class="btn" asp-controller="Group" asp-action="Ankete" asp-route-id="@Model.GrupaId">
+                <i class="bx bx-left-arrow-alt"></i> Nazad
+            </a>
+        </div>
+    </form>
+
+    @if (Model.IsCreator)
+    {
+            <div class="card-toolbar mt-16">
+                <h3 class="mt-0">Akcije ankete</h3>
+                <div class="table-actions">
+                @if (!Model.HasStarted)
+                {
+                            <form method="post" asp-action="StartAnketa">
+                        @Html.AntiForgeryToken()
+                                <input type="hidden" name="grupaId" value="@Model.GrupaId" />
+                                <input type="hidden" name="anketaId" value="@Model.AnketaId" />
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="bx bx-play"></i> Startuj
+                                </button>
+                            </form>
+                }
+                    <form method="post" asp-action="FinishAnketa">
+                    @Html.AntiForgeryToken()
+                        <input type="hidden" name="grupaId" value="@Model.GrupaId" />
+                        <input type="hidden" name="anketaId" value="@Model.AnketaId" />
+                        <button type="submit" class="btn btn-secondary btn-sm">
+                            <i class="bx bx-check-circle"></i> Završi
+                        </button>
+                    </form>
+                </div>
+            </div>
+    }
+
+    <div class="card-toolbar mt-24">
+        <h3 class="mt-0">Opcije</h3>
+
+        @if (Model.IsCreator && !Model.HasStarted)
+        {
+                <form method="post" asp-action="AddOption" class="option-add-form">
+                @Html.AntiForgeryToken()
+                    <input type="hidden" name="GrupaId" value="@Model.GrupaId" />
+                    <input type="hidden" name="AnketaId" value="@Model.AnketaId" />
+                    <input type="text" name="Naziv" class="input" placeholder="Nova opcija..." autocomplete="off" />
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="bx bx-plus"></i> Dodaj
+                    </button>
+                </form>
+        }
+    </div>
+
+    <div class="table-wrap">
+        <table class="bill-table edit">
+            <colgroup>
+                <col />
+                <col style="width: 160px" />
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>Naziv opcije</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var o in Model.Opcije)
+                {
+                        <tr>
+                            <td>@o.Naziv</td>
+                            <td class="tactions">
+                            @if (Model.IsCreator && !Model.HasStarted)
+                            {
+                                        <form method="post" asp-action="DeleteOption">
+                                    @Html.AntiForgeryToken()
+                                            <input type="hidden" name="grupaId" value="@Model.GrupaId" />
+                                            <input type="hidden" name="anketaId" value="@Model.AnketaId" />
+                                            <input type="hidden" name="optionId" value="@o.Id" />
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Obriši">
+                                                <i class="bx bx-x"></i> Obriši
+                                            </button>
+                                        </form>
+                            }
+                            </td>
+                        </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="form-actions">
+        <a class="btn" asp-controller="Group" asp-action="Ankete" asp-route-id="@Model.GrupaId">
+            <i class="bx bx-left-arrow-alt"></i> Nazad na ankete
+        </a>
+    </div>
+</div>

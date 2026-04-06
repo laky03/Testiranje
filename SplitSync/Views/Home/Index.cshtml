@@ -1,0 +1,536 @@
+﻿@model SplitSync.Models.HomeViewModel
+@{
+    var username = User.Identity?.Name ?? (string?)ViewBag.UsernameCookie ?? "User";
+}
+
+@if (!Model.DeoGrupe)
+{
+        <div class="app-card app-card-center">
+            <h1>Dobrodošli u SplitSync!</h1>
+            <p>Kreirajte novu ili prihvatite poziv u postojeću grupu.</p>
+            <a class="btn btn-primary" href="@Url.Action("Create", "Groups")">
+                <i class="ri-add-line"></i> + Nova grupa
+            </a>
+        </div>
+}
+else if (Model.Events == null || Model.Events.Count == 0)
+{
+        <section class="app-hero">
+            <h1>Dobrodošli, @username!</h1>
+            <p>Još uvek nema novih aktivnosti.</p>
+        </section>
+}
+else
+{
+        <section class="app-hero">
+            <h1>Dobrodošli, @username!</h1>
+            <p>Najskorije aktivnosti u vašim grupama.</p>
+        </section>
+
+        <div class="cards-grid app-card-narrow feed-stack">
+        <div id="events-container">
+        @foreach (var ev in Model.Events)
+        {
+            var group = Model.Grupe.FirstOrDefault(g => g.Id == ev.GroupId);
+            var creator = Model.Useri.FirstOrDefault(u => u.Id == ev.CreatedByUserId);
+
+            string postedAtText = null;
+            try
+            {
+                var t = ev.GetType();
+                foreach (var name in new[] { "Datum", "CreatedAt", "CreatedOn", "Created", "Timestamp", "VremeKreiranja", "CreatedAtUtc" })
+                {
+                    var pi = t.GetProperty(name);
+                    if (pi == null) continue;
+
+                    var val = pi.GetValue(ev);
+                    if (val == null) continue;
+
+                    if (val is DateTime d)
+                    {
+                        var local = d.Kind == DateTimeKind.Utc ? d.ToLocalTime() : d;
+                        postedAtText = local.ToString("dd.MM.yyyy. HH:mm");
+                        break;
+                    }
+
+                    if (val is string s && !string.IsNullOrWhiteSpace(s))
+                    {
+                        if (DateTime.TryParse(s, out var parsed))
+                        {
+                            var local = parsed.Kind == DateTimeKind.Utc ? parsed.ToLocalTime() : parsed;
+                            postedAtText = local.ToString("dd.MM.yyyy. HH:mm");
+                        }
+                        else
+                        {
+                            postedAtText = s;
+                        }
+                        break;
+                    }
+                }
+            }
+            catch {}
+
+                    <div class="event-card">
+                        <div class="event-header">
+                            <h3 class="event-title">
+                        @if (group?.SlikaBase64 != null)
+                        {
+                                        <img class="app-avatar" src="data:image/*;base64,@group.SlikaBase64" alt="Group" />
+                        }
+                        @(group?.Naziv ?? "Grupa")
+                            </h3>
+                            <a class="btn btn-secondary btn-sm"
+                               asp-controller="Group" asp-action="Index" asp-route-id="@ev.GroupId">
+                                <i class="bx bx-group"></i> Otvori grupu
+                            </a>
+                        </div>
+
+                        <div class="event-meta" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                    @if (creator != null)
+                    {
+                                    <span>
+                            @if (creator.SlikaBase64 != null)
+                            {
+                                                <img class="app-avatar" src="data:image/*;base64,@creator.SlikaBase64" alt="User" />
+                            }
+                            @creator.Username
+                                    </span>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(postedAtText))
+                    {
+                                    <span class="badge">@postedAtText</span>
+                    }
+                        </div>
+
+                @if (ev.IsRacun)
+                {
+                    var racunTitle = ev.RacunNaziv ?? "Račun";
+                    var racunTotal = (ev.RacunItems?.Sum(i => i.DeoRacuna) ?? 0.0);
+
+                                <div class="app-card bill-card" style="box-shadow:none;padding:0;border-radius:12px;">
+                                    <div class="bill-head">
+                                        <div class="bill-title-wrap">
+                                            <h3 class="bill-title">@racunTitle</h3>
+                                            <span class="amount-chip">@racunTotal.ToString("0.##")</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="table-wrap">
+                                        <table class="bill-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Član</th>
+                                                    <th>Platio</th>
+                                                    <th>Deo računa</th>
+                                                    <th>Saldo</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                    @if (ev.RacunItems != null)
+                                    {
+                                        foreach (var item in ev.RacunItems)
+                                        {
+                                            var u = Model.Useri.FirstOrDefault(x => x.Id == item.UserId);
+                                            var ime = u?.Username ?? $"Korisnik #{item.UserId}";
+                                            var saldo = (item.Iznos) - (item.DeoRacuna);
+                                            var saldoClass = saldo >= 0 ? "saldo-pos" : "saldo-neg";
+
+                                                            <tr>
+                                                                <td class="user-cell">
+                                                                    <span class="user-name">@ime</span>
+                                                                </td>
+                                                                <td>@item.Iznos.ToString("0.##")</td>
+                                                                <td>@item.DeoRacuna.ToString("0.##")</td>
+                                                                <td>
+                                                                    <span class="saldo-chip @saldoClass">@saldo.ToString("0.##")</span>
+                                                                </td>
+                                                            </tr>
+                                        }
+                                    }
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div class="table-actions mt-16">
+                                        <a class="btn btn-primary btn-sm"
+                                           asp-controller="Group" asp-action="Racuni" asp-route-id="@ev.GroupId">
+                                            <i class="bx bx-receipt"></i> Svi računi
+                                        </a>
+                                    </div>
+                                </div>
+                }
+
+
+                @if (ev.IsAnketa)
+                {
+                                <div class="event-body">
+                                    <h3 class="event-subtitle">@((ev.RacunNaziv ?? "Anketa"))</h3>
+
+                                    <div class="event-actions">
+                            @if (!ev.AnketaStarted.GetValueOrDefault())
+                            {
+                                                <a class="btn btn-primary btn-sm"
+                                                   asp-controller="Group" asp-action="AnketaEdit"
+                                                   asp-route-grupaId="@ev.GroupId" asp-route-anketaId="@ev.AnketaId">
+                                                    <i class="bx bx-edit"></i> Uredi anketu
+                                                </a>
+                            }
+                            else if (ev.AnketaFinished.GetValueOrDefault())
+                            {
+                                                <a class="btn btn-secondary btn-sm"
+                                                   asp-controller="Group" asp-action="Ankete"
+                                                   asp-route-id="@ev.GroupId">
+                                                    <i class="bx bx-chart"></i> Pogledaj rezultate ankete
+                                                </a>
+                            }
+                            else if (!ev.AnketaUserVecGlasao.GetValueOrDefault())
+                            {
+                                                <a class="btn btn-success btn-sm"
+                                                   asp-controller="Group" asp-action="AnketaGlasanje"
+                                                   asp-route-grupaId="@ev.GroupId" asp-route-anketaId="@ev.AnketaId">
+                                                    <i class="bx bx-check-circle"></i> Glasaj
+                                                </a>
+                            }
+                            else
+                            {
+                                                <a class="btn btn-secondary btn-sm"
+                                                   asp-controller="Group" asp-action="Ankete"
+                                                   asp-route-id="@ev.GroupId">
+                                                    <i class="bx bx-list-ul"></i> Ankete
+                                                </a>
+                            }
+                                    </div>
+                                </div>
+                }
+
+
+                @if (ev.IsDogadjaj)
+                {
+                                <article class="insta-card">
+                                    <header class="insta-head">
+                                        <div class="insta-user">
+                                @if (creator?.SlikaBase64 != null)
+                                {
+                                                    <img class="insta-avatar" src="data:image/*;base64,@creator.SlikaBase64" alt="User" />
+                                }
+                                            <div class="insta-usernames">
+                                                <span class="insta-username">@creator?.Username</span>
+                                                <span class="insta-sub">@((group?.Naziv) ?? "Grupa")</span>
+                                            </div>
+                                        </div>
+                                        <a class="btn btn-light btn-sm"
+                                           asp-controller="Group" asp-action="Dogadjaji" asp-route-id="@ev.GroupId">
+                                            Otvori događaje
+                                        </a>
+                                    </header>
+
+                        @if (!string.IsNullOrWhiteSpace(ev.DogadjajSlikaBase64))
+                        {
+                                            <div class="insta-media">
+                                                <img src="data:image/*;base64,@ev.DogadjajSlikaBase64" alt="Događaj" />
+                                            </div>
+                        }
+
+                                    <div class="insta-actions">
+                                        <a class="btn btn-primary btn-sm"
+                                           asp-controller="Group" asp-action="Dogadjaji" asp-route-id="@ev.GroupId">
+                                            <i class="bx bx-calendar-event"></i> Idi na događaje
+                                        </a>
+                                    </div>
+
+                                    <div class="insta-caption">
+                                        <p class="insta-title">@(!string.IsNullOrWhiteSpace(ev.DogadjajNaziv) ? ev.DogadjajNaziv : "Događaj")</p>
+                            @if (!string.IsNullOrWhiteSpace(ev.DogadjajOpis))
+                            {
+                                                <p class="insta-text">@ev.DogadjajOpis</p>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(ev.DogadjajLokacija))
+                            {
+                                                <p class="insta-meta"><i class="bx bx-map"></i> @ev.DogadjajLokacija</p>
+                            }
+                                    </div>
+                                </article>
+                }
+
+
+                @if (ev.IsShoppingListItem)
+                {
+                                <div class="event-body">
+                                    <h3 class="event-subtitle">Lista za kupovinu</h3>
+                                    <p>@(string.IsNullOrWhiteSpace(ev.ShoppingListItemNaziv) ? "Stavka" : ev.ShoppingListItemNaziv)</p>
+                                    <div class="event-actions">
+                                        <a class="btn btn-primary btn-sm"
+                                           asp-controller="Group" asp-action="ShoppingLista" asp-route-id="@ev.GroupId">
+                                            <i class="bx bx-cart"></i> Otvori listu za kupovinu
+                                        </a>
+                                    </div>
+                                </div>
+                }
+                    </div>
+        }
+        </div>
+        <div id="loading-indicator" style="display: none; text-align: center; padding: 20px;">
+            <p style="color:white;">Učitavanje...</p>
+        </div>
+        </div>
+
+        <script>
+            let isLoading = false;
+            let hasMoreEvents = @Html.Raw(Model.HasMoreEvents.ToString().ToLower());
+            const eventsContainer = document.getElementById('events-container');
+            const loadingIndicator = document.getElementById('loading-indicator');
+
+            function getEarliestEventDate() {
+                if (!window.modelEvents || window.modelEvents.length === 0) return null;
+                
+                let minDate = new Date(window.modelEvents[0].datum || window.modelEvents[0].Datum);
+                window.modelEvents.forEach(ev => {
+                    const date = new Date(ev.datum || ev.Datum);
+                    if (date < minDate) {
+                        minDate = date;
+                    }
+                });
+                return minDate;
+            }
+
+            function createEventCard(ev, groups, users) {
+                const event = {
+                    groupId: ev.groupId || ev.GroupId,
+                    createdByUserId: ev.createdByUserId || ev.CreatedByUserId,
+                    datum: ev.datum || ev.Datum,
+                    isRacun: ev.isRacun || ev.IsRacun,
+                    racunNaziv: ev.racunNaziv || ev.RacunNaziv,
+                    racunItems: ev.racunItems || ev.RacunItems,
+                    isAnketa: ev.isAnketa || ev.IsAnketa,
+                    anketaNaziv: ev.anketaNaziv || ev.AnketaNaziv,
+                    anketaStarted: ev.anketaStarted || ev.AnketaStarted,
+                    anketaFinished: ev.anketaFinished || ev.AnketaFinished,
+                    anketaUserVecGlasao: ev.anketaUserVecGlasao || ev.AnketaUserVecGlasao,
+                    anketaId: ev.anketaId || ev.AnketaId,
+                    isDogadjaj: ev.isDogadjaj || ev.IsDogadjaj,
+                    dogadjajNaziv: ev.dogadjajNaziv || ev.DogadjajNaziv,
+                    dogadjajSlikaBase64: ev.dogadjajSlikaBase64 || ev.DogadjajSlikaBase64,
+                    dogadjajOpis: ev.dogadjajOpis || ev.DogadjajOpis,
+                    dogadjajLokacija: ev.dogadjajLokacija || ev.DogadjajLokacija,
+                    isShoppingListItem: ev.isShoppingListItem || ev.IsShoppingListItem,
+                    shoppingListItemNaziv: ev.shoppingListItemNaziv || ev.ShoppingListItemNaziv
+                };
+
+                const group = groups.find(g => (g.id || g.Id) === event.groupId);
+                const creator = users.find(u => (u.id || u.Id) === event.createdByUserId);
+
+                let postedAtText = '';
+                if (event.datum) {
+                    const d = new Date(event.datum);
+                    const day = String(d.getDate()).padStart(2, '0');
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const year = d.getFullYear();
+                    const hours = String(d.getHours()).padStart(2, '0');
+                    const minutes = String(d.getMinutes()).padStart(2, '0');
+                    postedAtText = `${day}.${month}.${year}. ${hours}:${minutes}`;
+                }
+
+                const groupSlika = group?.slikaBase64 || group?.SlikaBase64;
+                const groupNaziv = group?.naziv || group?.Naziv;
+                const creatorSlika = creator?.slikaBase64 || creator?.SlikaBase64;
+                const creatorUsername = creator?.username || creator?.Username;
+
+                let eventCard = `
+                    <div class="event-card">
+                        <div class="event-header">
+                            <h3 class="event-title">
+                                ${groupSlika ? `<img class="app-avatar" src="data:image/*;base64,${groupSlika}" alt="Group" />` : ''}
+                                ${groupNaziv ?? 'Grupa'}
+                            </h3>
+                            <a class="btn btn-secondary btn-sm" href="/Group/Index/${event.groupId}">
+                                <i class="bx bx-group"></i> Otvori grupu
+                            </a>
+                        </div>
+                        <div class="event-meta" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                            ${creator ? `
+                                <span>
+                                    ${creatorSlika ? `<img class="app-avatar" src="data:image/*;base64,${creatorSlika}" alt="User" />` : ''}
+                                    ${creatorUsername}
+                                </span>
+                            ` : ''}
+                            ${postedAtText ? `<span class="badge">${postedAtText}</span>` : ''}
+                        </div>`;
+
+                if (event.isRacun) {
+                    const racunTotal = event.racunItems?.reduce((sum, i) => sum + (i.deoRacuna || i.DeoRacuna), 0) ?? 0;
+                    eventCard += `
+                        <div class="app-card bill-card" style="box-shadow:none;padding:0;border-radius:12px;">
+                            <div class="bill-head">
+                                <div class="bill-title-wrap">
+                                    <h3 class="bill-title">${event.racunNaziv ?? 'Račun'}</h3>
+                                    <span class="amount-chip">${racunTotal.toFixed(2)}</span>
+                                </div>
+                            </div>
+                            <div class="table-wrap">
+                                <table class="bill-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Član</th>
+                                            <th>Platio</th>
+                                            <th>Deo računa</th>
+                                            <th>Saldo</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>`;
+                    
+                    if (event.racunItems) {
+                        event.racunItems.forEach(item => {
+                            const userId = item.userId || item.UserId;
+                            const u = users.find(x => (x.id || x.Id) === userId);
+                            const ime = (u?.username || u?.Username) ?? `Korisnik #${userId}`;
+                            const iznos = item.iznos || item.Iznos;
+                            const deoRacuna = item.deoRacuna || item.DeoRacuna;
+                            const saldo = iznos - deoRacuna;
+                            const saldoClass = saldo >= 0 ? 'saldo-pos' : 'saldo-neg';
+                            eventCard += `
+                                <tr>
+                                    <td class="user-cell"><span class="user-name">${ime}</span></td>
+                                    <td>${iznos.toFixed(2)}</td>
+                                    <td>${deoRacuna.toFixed(2)}</td>
+                                    <td><span class="saldo-chip ${saldoClass}">${saldo.toFixed(2)}</span></td>
+                                </tr>`;
+                        });
+                    }
+                    
+                    eventCard += `
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="table-actions mt-16">
+                                <a class="btn btn-primary btn-sm" href="/Group/Racuni/${event.groupId}">
+                                    <i class="bx bx-receipt"></i> Svi računi
+                                </a>
+                            </div>
+                        </div>`;
+                }
+
+                if (event.isAnketa) {
+                    eventCard += `
+                        <div class="event-body">
+                            <h3 class="event-subtitle">${event.anketaNaziv ?? 'Anketa'}</h3>
+                            <div class="event-actions">`;
+                    
+                    if (!event.anketaStarted) {
+                        eventCard += `
+                                <a class="btn btn-primary btn-sm" href="/Group/AnketaEdit?grupaId=${event.groupId}&anketaId=${event.anketaId}">
+                                    <i class="bx bx-edit"></i> Uredi anketu
+                                </a>`;
+                    } else if (event.anketaFinished) {
+                        eventCard += `
+                                <a class="btn btn-secondary btn-sm" href="/Group/Ankete/${event.groupId}">
+                                    <i class="bx bx-chart"></i> Pogledaj rezultate ankete
+                                </a>`;
+                    } else if (!event.anketaUserVecGlasao) {
+                        eventCard += `
+                                <a class="btn btn-success btn-sm" href="/Group/AnketaGlasanje?grupaId=${event.groupId}&anketaId=${event.anketaId}">
+                                    <i class="bx bx-check-circle"></i> Glasaj
+                                </a>`;
+                    } else {
+                        eventCard += `
+                                <a class="btn btn-secondary btn-sm" href="/Group/Ankete/${event.groupId}">
+                                    <i class="bx bx-list-ul"></i> Ankete
+                                </a>`;
+                    }
+                    
+                    eventCard += `
+                            </div>
+                        </div>`;
+                }
+
+                if (event.isDogadjaj) {
+                    eventCard += `
+                        <article class="insta-card">
+                            <header class="insta-head">
+                                <div class="insta-user">
+                                    ${creatorSlika ? `<img class="insta-avatar" src="data:image/*;base64,${creatorSlika}" alt="User" />` : ''}
+                                    <div class="insta-usernames">
+                                        <span class="insta-username">${creatorUsername}</span>
+                                        <span class="insta-sub">${groupNaziv ?? 'Grupa'}</span>
+                                    </div>
+                                </div>
+                                <a class="btn btn-light btn-sm" href="/Group/Dogadjaji/${event.groupId}">Otvori događaje</a>
+                            </header>
+                            ${event.dogadjajSlikaBase64 ? `
+                                <div class="insta-media">
+                                    <img src="data:image/*;base64,${event.dogadjajSlikaBase64}" alt="Događaj" />
+                                </div>
+                            ` : ''}
+                            <div class="insta-actions">
+                                <a class="btn btn-primary btn-sm" href="/Group/Dogadjaji/${event.groupId}">
+                                    <i class="bx bx-calendar-event"></i> Idi na događaje
+                                </a>
+                            </div>
+                            <div class="insta-caption">
+                                <p class="insta-title">${event.dogadjajNaziv ?? 'Događaj'}</p>
+                                ${event.dogadjajOpis ? `<p class="insta-text">${event.dogadjajOpis}</p>` : ''}
+                                ${event.dogadjajLokacija ? `<p class="insta-meta"><i class="bx bx-map"></i> ${event.dogadjajLokacija}</p>` : ''}
+                            </div>
+                        </article>`;
+                }
+
+                if (event.isShoppingListItem) {
+                    eventCard += `
+                        <div class="event-body">
+                            <h3 class="event-subtitle">Lista za kupovinu</h3>
+                            <p>${event.shoppingListItemNaziv ?? 'Stavka'}</p>
+                            <div class="event-actions">
+                                <a class="btn btn-primary btn-sm" href="/Group/ShoppingLista/${event.groupId}">
+                                    <i class="bx bx-cart"></i> Otvori listu za kupovinu
+                                </a>
+                            </div>
+                        </div>`;
+                }
+
+                eventCard += `</div>`;
+                return eventCard;
+            }
+
+            async function loadMoreEvents() {
+                if (isLoading || !hasMoreEvents) return;
+
+                const earliestDate = getEarliestEventDate();
+                if (!earliestDate) return;
+
+                isLoading = true;
+                loadingIndicator.style.display = 'block';
+
+                try {
+                    const response = await fetch(`/Home/LoadMoreEvents?before=${earliestDate.toISOString()}`);
+                    const data = await response.json();
+
+                    if (data.events && data.events.length > 0) {
+                        data.events.forEach(ev => {
+                            const eventHtml = createEventCard(ev, data.grupe, data.useri);
+                            eventsContainer.insertAdjacentHTML('beforeend', eventHtml);
+                        });
+
+                        window.modelEvents.push(...data.events);
+                        hasMoreEvents = data.hasMoreEvents;
+                    } else {
+                        hasMoreEvents = false;
+                    }
+                } catch (error) {
+                    console.error('Error loading more events:', error);
+                } finally {
+                    isLoading = false;
+                    loadingIndicator.style.display = 'none';
+                }
+            }
+
+            window.modelEvents = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Events));
+
+            window.addEventListener('scroll', () => {
+                const scrollPosition = window.innerHeight + window.scrollY;
+                const threshold = document.documentElement.scrollHeight - 200;
+
+                if (scrollPosition >= threshold) {
+                    loadMoreEvents();
+                }
+            });
+        </script>
+}

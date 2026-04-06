@@ -1,0 +1,66 @@
+﻿@model SplitSync.Models.AccountLoginViewModel
+@{
+    ViewData["Title"] = "Prijava";
+    Layout = "_Layout";
+}
+
+@section Styles {
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+        <link href="https://unpkg.com/[email protected]/css/boxicons.min.css" rel="stylesheet">
+}
+
+<section class="auth2 container forms forms-single">
+    <div class="form login">
+        <div class="form-content">
+            <header>Prijava</header>
+
+            @if (!string.IsNullOrEmpty(Model?.ErrorMessage))
+            {
+                    <div class="auth2-alert error">@Model.ErrorMessage</div>
+            }
+
+            <form asp-action="Login" method="post" novalidate>
+                @Html.AntiForgeryToken()
+
+                <div class="field input-field">
+                    <input class="input" asp-for="Identifier" placeholder="Username ili Email" required />
+                </div>
+
+                <div class="field input-field">
+                    <input class="input" asp-for="Password" type="password" placeholder="Lozinka" required />
+                    <i class='bx bx-hide eye-icon' aria-hidden="true"></i>
+                </div>
+
+                <div class="form-link">
+                    <a class="forgot-pass"
+                       asp-controller="Account"
+                       asp-action="ForgotPassword">Zaboravljena lozinka?</a>
+                </div>
+
+                <div class="field button-field">
+                    <button type="submit">Prijavi se</button>
+                </div>
+            </form>
+
+            <div class="form-link">
+                <span>Nemaš nalog?
+                    <a class="link"
+                       asp-action="Register">Registruj se</a>
+                </span>
+            </div>
+        </div>
+
+        <div class="line"></div>
+
+        <div class="media-options">
+            <a href="/GoogleAuth/Start" class="field google">
+                <img src="~/images/google.png" alt="Google" class="google-img">
+                <span>Nastavi sa Google-om</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+        <script src="~/js/auth.js" asp-append-version="true"></script>
+}

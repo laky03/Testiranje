@@ -1,0 +1,132 @@
+﻿@model SplitSync.Models.AnketaCreateViewModel
+
+@{
+    ViewData["Title"] = "Kreiraj anketu";
+    var options = Model?.Opcije ?? new List<string>();
+    if (options.Count == 0) options.Add("");
+}
+
+<section class="app-hero">
+    <h1>Kreiraj anketu</h1>
+    <p>Unesi naziv, dodaj opcije i po želji odmah pokreni anketu.</p>
+</section>
+
+<div class="app-card app-card-narrow">
+    @if (!string.IsNullOrWhiteSpace(Model?.ErrorMessage))
+    {
+            <div class="app-alert error">@Model.ErrorMessage</div>
+    }
+
+    <form method="post" asp-action="AnketaCreate" class="form-stacked">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="GrupaId" value="@Model.GrupaId" />
+
+        <div class="form-field stretch">
+            <label class="form-label">Naziv ankete</label>
+            <input type="text" name="Naziv" value="@Model.Naziv"
+                   class="input input-full" placeholder="npr. Film za veče" autocomplete="off" />
+        </div>
+
+        <div class="card-toolbar mt-16">
+            <h3 class="mt-0">Opcije</h3>
+            <button type="button" id="addRow" class="btn btn-primary btn-sm">
+                <i class="bx bx-plus"></i> Dodaj red
+            </button>
+        </div>
+
+        <div class="table-wrap">
+            <table class="bill-table edit">
+                <colgroup>
+                    <col />
+                    <col style="width: 160px" />
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>Naziv opcije</th>
+                        <th></th>
+                    </tr>
+                </thead>
+
+                <tbody id="rows" data-next-index="@options.Count">
+                    @{
+                        for (var i = 0; i < options.Count; i++)
+                        {
+                                <tr>
+                                    <td>
+                                        <input type="hidden" name="Opcije.index" value="@i" />
+                                        <input type="text" name="Opcije[@i]" value="@options[i]"
+                                               class="input" placeholder="npr. Termin 20:15" autocomplete="off" />
+                                    </td>
+                                    <td class="tactions">
+                                        <button type="button" class="btn btn-danger btn-sm removeRow" title="Ukloni red">
+                                            <i class="bx bx-x"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            ;
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="form-field mt-16">
+            <label class="checkbox">
+                <input type="checkbox" name="StartOdmah" value="true" @(Model.StartOdmah ? "checked" : "") />
+                Pokreni anketu odmah
+            </label>
+            <input type="hidden" name="StartOdmah" value="false" />
+        </div>
+
+        <div class="form-actions">
+            <a class="btn" asp-controller="Group" asp-action="Ankete" asp-route-id="@Model.GrupaId">
+                <i class="bx bx-left-arrow-alt"></i> Otkaži
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="bx bx-save"></i> Sačuvaj
+            </button>
+        </div>
+    </form>
+</div>
+
+<template id="row-template">
+  <tr>
+    <td>
+      <input type="hidden" name="Opcije.index" value="__i__" />
+      <input type="text" name="Opcije[__i__]" class="input"
+             placeholder="npr. Termin 20:15" autocomplete="off" />
+    </td>
+    <td class="tactions">
+      <button type="button" class="btn btn-danger btn-sm removeRow" title="Ukloni red">
+        <i class="bx bx-x"></i>
+      </button>
+    </td>
+  </tr>
+</template>
+
+@section Scripts {
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const rows = document.getElementById('rows');
+      const addBtn = document.getElementById('addRow');
+      const tplHtml = document.getElementById('row-template').innerHTML.trim();
+
+      function nextIndex() {
+        const n = parseInt(rows.dataset.nextIndex || '0', 10);
+        rows.dataset.nextIndex = (n + 1).toString();
+        return n;
+      }
+
+      addBtn?.addEventListener('click', () => {
+        const i = nextIndex();
+        rows.insertAdjacentHTML('beforeend', tplHtml.replaceAll('__i__', i));
+      });
+
+      rows?.addEventListener('click', (e) => {
+        if (e.target.closest('.removeRow')) {
+          e.target.closest('tr')?.remove();
+        }
+      });
+    });
+    </script>
+}

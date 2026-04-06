@@ -1,0 +1,57 @@
+﻿@model SplitSync.Models.AccountGoogleUsernameViewModel
+@{
+    ViewData["Title"] = "Izbor korisničkog imena";
+}
+
+@section Styles {
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+        <link href="https://unpkg.com/[email protected]/css/boxicons.min.css" rel="stylesheet">
+}
+
+<section class="auth2 container forms forms-single">
+    <div class="form signup">
+        <div class="form-content">
+            <header>Odaberi korisničko ime</header>
+
+            @if (!string.IsNullOrWhiteSpace(Model?.ErrorMessage))
+            {
+                    <div class="auth2-alert error">@Model.ErrorMessage</div>
+            }
+
+            <form asp-action="GoogleUsername" asp-controller="Account" method="post" novalidate>
+                @Html.AntiForgeryToken()
+
+                <p class="desc">
+                    Prijavljen si preko Google naloga. Molimo odaberi jedinstveno korisničko ime.
+                </p>
+
+                <div class="field input-field">
+                    <input class="input" asp-for="Username" placeholder="Korisničko ime" required />
+                </div>
+
+                <div class="field button-field">
+                    <button type="submit">Nastavi</button>
+                </div>
+            </form>
+
+            <div class="form-link">
+                <span>Već imaš nalog pod tim imenom?
+                    <a class="link" asp-action="Login" asp-controller="Account">Prijava</a>
+                </span>
+            </div>
+        </div>
+
+        <div class="line"></div>
+
+        <div class="media-options">
+            <a href="/GoogleAuth/Start" class="field google">
+                <img src="~/images/google.png" alt="Google" class="google-img">
+                <span>Nastavi sa Google-om</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+        <script src="~/js/auth.js" asp-append-version="true"></script>
+}

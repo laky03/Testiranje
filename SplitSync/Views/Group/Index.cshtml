@@ -1,0 +1,95 @@
+﻿@model SplitSync.Models.GroupDashboardViewModel
+@{
+    ViewData["Title"] = Model.GroupName;
+    var gid = Model?.GroupId ?? 0;
+    var count = Model?.Members?.Count() ?? 0;
+}
+
+<div class="page-frame">
+
+    <header class="group-hero rail">
+        <div class="group-cover-lg">
+            @if (!string.IsNullOrEmpty(Model.ImageBase64))
+            {
+                            <img src="data:image/png;base64,@Model.ImageBase64" alt="@Model.GroupName" />
+            }
+            else
+            {
+                            <div class="group-cover-fallback-lg" aria-hidden="true">
+                                <span>@(string.IsNullOrWhiteSpace(Model.GroupName) ? "G" : char.ToUpper(Model.GroupName[0]))</span>
+                            </div>
+            }
+        </div>
+        <h1 class="group-title">@Model.GroupName</h1>
+    </header>
+
+    <section class="group-row rail">
+        <article class="app-card card-slab">
+            <div class="card-head">
+                <h3 class="mt-0 mb-0">Članovi grupe</h3>
+                <span class="pill">@count</span>
+            </div>
+
+            <div class="member-scroll">
+                <div class="member-wrap">
+                    @foreach (var m in Model.Members)
+                    {
+                        var name = !string.IsNullOrWhiteSpace(m.Nickname) ? m.Nickname : (m.Username ?? "Korisnik");
+                        string initial = string.IsNullOrWhiteSpace(name) ? "?" : name.Trim()[..1].ToUpper();
+
+                                    <div class="member-chip">
+                                        <div class="chip-avatar">@initial</div>
+                                        <div class="chip-info">
+                                            <div class="chip-name">@name</div>
+                                @if (!string.IsNullOrWhiteSpace(m.Username) && !string.Equals(name, m.Username, StringComparison.OrdinalIgnoreCase))
+                                {
+                                                            <div class="chip-username">@m.Username</div>
+                                }
+                                        </div>
+                            @if (m.IsAdmin)
+                            {
+                                                        <span class="pill pill-admin">admin</span>
+                            }
+                                    </div>
+                    }
+                </div>
+            </div>
+        </article>
+
+        <article class="app-card card-slab">
+            <div class="card-head">
+                <h3 class="mt-0 mb-0">Pozovi člana</h3>
+                <i class="ri-send-plane-2-line big-icon" aria-hidden="true"></i>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                    <div class="alert alert-danger" role="alert">
+                    @Model.ErrorMessage
+                    </div>
+            }
+
+            <form asp-action="Invite" asp-controller="Group" method="post" class="invite-form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="groupId" value="@gid" />
+                <div class="invite-row">
+                    <input class="input" type="text" name="identifier" placeholder="username ili email" />
+                    <button class="btn btn-primary" type="submit"><i class="ri-send-plane-2-line"></i> Pošalji</button>
+                </div>
+            </form>
+        </article>
+    </section>
+
+    <section class="quicklinks-card app-card rail">
+        <nav class="quick-links">
+            <a class="qlink" asp-action="Racuni" asp-route-id="@gid"><i class="ri-file-list-3-line"></i> Računi</a>
+            <a class="qlink" asp-action="PredlogUplata" asp-route-id="@gid"><i class="ri-hand-coin-line"></i> Predlog uplata</a>
+            <a class="qlink" asp-action="Ankete" asp-route-id="@gid"><i class="ri-bar-chart-grouped-line"></i> Ankete</a>
+            <a class="qlink" asp-action="Dogadjaji" asp-route-id="@gid"><i class="ri-calendar-event-line"></i> Događaji</a>
+            <a class="qlink" asp-action="ShoppingLista" asp-route-id="@gid"><i class="ri-shopping-cart-2-line"></i> Shopping lista</a>
+            <a class="qlink" asp-action="Chat" asp-route-id="@gid"><i class="ri-chat-3-line"></i> Chat</a>
+            <a class="qlink" asp-action="Settings" asp-route-grupaId="@gid"><i class="ri-settings-3-line"></i> Podešavanja</a>
+        </nav>
+    </section>
+
+</div>

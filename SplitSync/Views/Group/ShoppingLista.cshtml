@@ -1,0 +1,186 @@
+﻿@using SplitSync.Models
+@model ShoppingListaViewModel
+@{
+    ViewData["Title"] = "Shopping lista";
+}
+
+<div class="group-hero">
+    <h1 class="group-title">@ViewData["TrenutnaGrupaNaziv"]</h1>
+</div>
+
+<div class="shop-wrap">
+    <div class="app-card app-card-center">
+        <h3 class="mt-0">Dodaj stavku</h3>
+        @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+        {
+                <div class="alert alert-danger" style="margin-bottom: 16px;">@Model.ErrorMessage</div>
+        }
+        <form asp-action="DodajItem" asp-controller="Group" method="post" class="shop-add-form center">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="grupaId" value="@Model.GrupaId" />
+            <input class="input" type="text" name="naziv" placeholder="npr. Mleko, hleb, pasta..." required />
+            <button class="btn btn-primary" type="submit"><i class="ri-add-line"></i> Dodaj</button>
+        </form>
+    </div>
+
+
+
+<div class="shop-grid">
+    <div class="app-card">
+        <div class="shop-head">
+            <div class="shop-title">
+                <i class="ri-shopping-bag-3-line"></i>
+                <h3>Za nabavku</h3>
+            </div>
+            <span class="count-chip">@((Model.Items?.Count() ?? 0))</span>
+        </div>
+
+            @if (Model.Items == null || !Model.Items.Any())
+            {
+                <div class="empty-state" style="margin-top:10px;">
+                    <div class="empty-icon"><i class="ri-checkbox-blank-line"></i></div>
+                    <h3>Nema stavki</h3>
+                    <p>Dodaj šta treba kupiti.</p>
+                </div>
+            }
+            else
+            {
+                <div class="shop-list">
+                    @foreach (var i in Model.Items)
+                    {
+                        var who = string.IsNullOrWhiteSpace(i.TrazioUserNickname) ? i.TrazioUserUsername : i.TrazioUserNickname;
+                            <div class="shop-row">
+                                <div class="shop-main">
+                                        <div class="shop-bullet warn" aria-hidden="true"><i class="ri-shopping-bag-line"></i></div>
+                                    <div class="shop-name">@i.Naziv</div>
+                                </div>
+                                <div class="shop-meta">
+                                    <span class="chip chip-muted" title="Tražio">@who</span>
+                                    <span class="chip chip-soft">@i.TrazenoUtc.ToLocalTime().ToString("dd.MM.yyyy. HH:mm")</span>
+                                </div>
+                                <div class="shop-actions">
+                                    <form asp-action="NabaviShoppingItem" asp-controller="Group" method="post">
+                                    @Html.AntiForgeryToken()
+                                        <input type="hidden" name="grupaId" value="@Model.GrupaId" />
+                                        <input type="hidden" name="shoppingItemId" value="@i.Id" />
+                                        <button class="btn btn-primary btn-sm" type="submit"><i class="ri-check-line"></i> Nabavljeno</button>
+                                    </form>
+
+                                @if (i.CanDelete)
+                                {
+                                            <button type="button" class="btn btn-danger btn-sm js-del" data-id="@i.Id" data-name="@i.Naziv">
+                                                <i class="ri-delete-bin-line"></i> Obriši
+                                            </button>
+                                }
+                                </div>
+                            </div>
+                    }
+                </div>
+            }
+    </div>
+
+    <div class="app-card">
+        <div class="shop-head">
+            <div class="shop-title">
+                <i class="ri-checkbox-circle-line"></i>
+                <h3>Nabavljeno</h3>
+            </div>
+            <span class="count-chip">@((Model.Nabavljeni?.Count() ?? 0))</span>
+        </div>
+
+            @if (Model.Nabavljeni == null || !Model.Nabavljeni.Any())
+            {
+                <div class="empty-state" style="margin-top:10px;">
+                    <div class="empty-icon"><i class="ri-inbox-archive-line"></i></div>
+                    <h3>Još ništa nije nabavljeno</h3>
+                    <p>Kad označiš „Nabavljeno“, stavka prelazi ovde.</p>
+                </div>
+            }
+            else
+            {
+                <div class="shop-list bought">
+                    @foreach (var i in Model.Nabavljeni)
+                    {
+                        var whoAsked = string.IsNullOrWhiteSpace(i.TrazioUserNickname) ? i.TrazioUserUsername : i.TrazioUserNickname;
+                        var whoBought = string.IsNullOrWhiteSpace(i.NabavioUserNickname) ? i.NabavioUserUsername : i.NabavioUserNickname;
+                            <div class="shop-row">
+                                <div class="shop-main">
+                                    <div class="shop-bullet ok" aria-hidden="true"><i class="ri-check-line"></i></div>
+                                    <div class="shop-name">@i.Naziv</div>
+                                </div>
+                                <div class="shop-meta">
+                                    <span class="chip chip-muted" title="Tražio">@whoAsked</span>
+                                    <span class="chip chip-success" title="Nabavio">@whoBought</span>
+                                @if (i.NabavljenoUtc != null)
+                                {
+                                            <span class="chip chip-soft">@i.NabavljenoUtc!.Value.ToLocalTime().ToString("dd.MM.yyyy. HH:mm")</span>
+                                }
+                                </div>
+                                <div class="shop-actions">
+                                @if (i.CanDelete)
+                                {
+                                            <button type="button" class="btn btn-danger btn-sm js-del" data-id="@i.Id" data-name="@i.Naziv">
+                                                <i class="ri-delete-bin-line"></i> Obriši
+                                            </button>
+                                }
+                                </div>
+                            </div>
+                    }
+                </div>
+            }
+    </div>
+</div>
+</div>
+
+<div id="shopDelModal" class="modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-content app-card" role="dialog" aria-modal="true" aria-labelledby="shopDelTitle">
+        <div class="modal-header">
+            <h3 id="shopDelTitle" class="mt-0">Obriši stavku</h3>
+            <button class="btn-icon js-close" aria-label="Zatvori"><i class="ri-close-line"></i></button>
+        </div>
+        <div class="modal-body" style="padding: 12px 16px;">
+            <p class="js-del-title" style="margin:0;">Da li sigurno želiš da obrišeš stavku?</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary js-close"><i class="ri-arrow-left-line"></i> Odustani</button>
+            <form asp-action="DeleteShoppingItem" asp-controller="Group" method="post" style="margin:0;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="grupaId" value="@Model.GrupaId" />
+                <input type="hidden" name="shoppingItemId" value="" />
+                <button type="submit" class="btn btn-danger">
+                    <i class="ri-delete-bin-2-line"></i> Obriši
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+        <script>
+            (function(){
+              const modal = document.getElementById('shopDelModal');
+              const overlay = modal.querySelector('.modal-overlay');
+              const closeBtns = modal.querySelectorAll('.js-close');
+              const title = modal.querySelector('.js-del-title');
+              const input = modal.querySelector('input[name="shoppingItemId"]');
+
+              function openModal(id, name){
+                title.textContent = `Da li sigurno želiš da obrišeš stavku "${name}"?`;
+                input.value = id;
+                modal.classList.add('open');
+              }
+              function closeModal(){ modal.classList.remove('open'); }
+
+              document.addEventListener('click', (e)=>{
+                const btn = e.target.closest('.js-del');
+                if (btn) openModal(btn.dataset.id, btn.dataset.name);
+                if (e.target === overlay || e.target.closest('.js-close')) closeModal();
+              });
+            })();
+        </script>
+}
+
+@section Styles {
+        <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet" />
+}

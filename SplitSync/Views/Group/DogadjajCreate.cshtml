@@ -1,0 +1,101 @@
+﻿@model SplitSync.Models.DogadjajCreateViewModel
+@{
+    ViewData["Title"] = "Novi događaj";
+}
+
+<section class="app-hero">
+    <h1>Novi događaj</h1>
+    <p>Unesi detalje i opcionalno dodaj sliku.</p>
+</section>
+
+<div class="app-card app-card-narrow">
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+            <div class="alert alert-danger">@Model.ErrorMessage</div>
+    }
+
+    <form asp-action="DogadjajCreate"
+          asp-controller="Group"
+          method="post"
+          enctype="multipart/form-data"
+          class="form-stacked">
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" asp-for="GrupaId" />
+
+        <div class="form-field stretch">
+            <label class="form-label">Naziv</label>
+            <input asp-for="Naziv" class="input input-full" placeholder="npr. Proslava rođendana" autocomplete="off" />
+        </div>
+
+        <div class="form-field stretch">
+            <label class="form-label">Opis</label>
+            <textarea asp-for="Opis" rows="5" class="input input-full" placeholder="Kratak opis događaja..."></textarea>
+        </div>
+
+        <div class="form-field stretch">
+            <label class="form-label">Lokacija</label>
+            <input asp-for="Lokacija" class="input input-full" placeholder="npr. Kej, kafić XYZ" autocomplete="off" />
+        </div>
+
+        <div class="form-field stretch">
+            <label class="form-label">Vreme događaja</label>
+            <input asp-for="VremeDogadjaja" type="datetime-local" class="input input-full" required />
+        </div>
+
+        <div class="form-field">
+            <label class="form-label">Slika (opciono)</label>
+            <div class="upload-dropzone">
+                <label for="slikaInput" class="dz-label">
+                    <i class="ri-image-add-line"></i>
+                    <span class="dz-text">
+                        <strong>Izaberi sliku</strong> – prevuci ili
+                        <span class="dz-link">odaberi fajl</span>
+                    </span>
+                </label>
+                <input class="dz-input" type="file" asp-for="Slika" id="slikaInput" accept="image/*" />
+            </div>
+            <div class="upload-preview" id="slikaPreview" style="display:none">
+                <img alt="Preview" />
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a class="btn" asp-controller="Group" asp-action="Dogadjaji" asp-route-id="@Model.GrupaId">
+                <i class="bx bx-left-arrow-alt"></i> Nazad
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="bx bx-save"></i> Kreiraj
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Styles {
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet" />
+}
+
+@section Scripts {
+    <script>
+    (() => {
+      const input = document.getElementById('slikaInput');
+      const previewContainer = document.getElementById('slikaPreview');
+      const previewImg = previewContainer?.querySelector('img');
+
+      input?.addEventListener('change', () => {
+        const file = input.files?.[0];
+        if (!file) {
+          if (previewContainer) previewContainer.style.display = 'none';
+          if (previewImg) previewImg.src = '';
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          if (previewImg) previewImg.src = e.target.result;
+          if (previewContainer) previewContainer.style.display = 'flex';
+        };
+        reader.readAsDataURL(file);
+      });
+    })();
+    </script>
+}

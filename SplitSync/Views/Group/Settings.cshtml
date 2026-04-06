@@ -1,0 +1,187 @@
+﻿@model SettingsViewModel
+@{
+    ViewData["Title"] = "Podešavanja";
+}
+
+@using System.Security.Claims
+@{
+    var _uidStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    long? _uid = long.TryParse(_uidStr, out var _tmp) ? _tmp : (long?)null;
+}
+
+
+<div class="app-hero group-hero">
+    <div class="group-cover-lg">
+        @if (!string.IsNullOrEmpty(Model.Base64Slika))
+        {
+            <img src="data:image/*;base64,@Model.Base64Slika" alt="Slika grupe" />
+        }
+        else
+        {
+            <div class="group-cover-fallback-lg"><span>@Model.NazivGrupe?.Substring(0, Math.Min(2, Model.NazivGrupe.Length)).ToUpper()</span></div>
+        }
+    </div>
+    <h1 class="group-title">@Model.NazivGrupe</h1>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="app-card app-card-narrow mb-10">
+        <div class="app-alert error"><i>!</i>@Model.ErrorMessage</div>
+    </div>
+}
+
+<div class="settings-grid">
+
+    <div class="app-card">
+
+        <h3 class="mt-0">Osnovna podešavanja</h3>
+
+        <form asp-action="UpdateNazivGrupe" method="post" class="inline-form one-line">
+            <input type="hidden" name="grupaId" value="@Model.GrupaId" />
+            <input class="input w-260" type="text" name="nazivGrupe"
+                   value="@Model.NazivGrupe" @(Model.IsAdmin ? null : "readonly") />
+            @if (Model.IsAdmin)
+            {
+                <button class="btn btn-primary btn-xs" type="submit">
+                    <span class="icon">✎</span> Sačuvaj naziv
+                </button>
+            }
+            else
+            {
+                <span class="chip chip-muted">Samo admin može menjati naziv</span>
+            }
+        </form>
+
+
+        <h3 class="mt-24">Slika grupe</h3>
+
+        <form asp-action="UpdateSlikuGrupe" method="post" enctype="multipart/form-data" class="form-stacked">
+            <input type="hidden" name="grupaId" value="@Model.GrupaId" />
+            <div class="form-field">
+                <label class="upload-dropzone">
+                    <span class="icon">📷</span>
+                    <div class="dz-text">
+                        <strong>Dodaj/izmeni sliku</strong> – prevuci ili <span class="dz-link">odaberi fajl</span>
+                    </div>
+                    <input class="dz-input" type="file" name="slika" accept="image/*" id="groupImageInput" />
+                </label>
+                <div id="groupImagePreview" class="upload-preview" style="display:none;"><img alt="Preview" /></div>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit"><span class="icon">⬆</span> Sačuvaj sliku</button>
+                <button class="btn btn-secondary" type="submit" onclick="document.getElementById('groupImageInput').value='';">
+                    <span class="icon">🗑</span> Ukloni sliku
+                </button>
+            </div>
+        </form>
+
+        <div class="danger-inline mt-24">
+            <div class="danger-head">
+                <form asp-action="NapustiGrupu" method="post" class="inline-form">
+                    <input type="hidden" name="grupaId" value="@Model.GrupaId" />
+                    <button class="btn btn-danger" type="submit">
+                        <span class="icon">🚪</span> Napusti grupu
+                    </button>
+                </form>
+            </div>
+            <p class="muted small mt-8">
+                Napomena: napuštanjem grupe biće obrisane sve tvoje stavke sa shopping liste.
+            </p>
+        </div>
+
+    </div>
+
+    <div class="app-card">
+
+        <h3 class="mt-0">Članovi grupe</h3>
+        <div class="users-list">
+            @foreach (var u in Model.Users)
+            {
+                <div class="user-row">
+                    <div class="u-main">
+                        <div class="u-avatar">
+                            @if (!string.IsNullOrEmpty(u.Base64Image))
+                            {
+                                <img src="data:image/*;base64,@u.Base64Image" alt="@u.Username" />
+                            }
+                            else
+                            {
+                                <span class="avatar-fallback">@((u.Username ?? "U")[0].ToString().ToUpper())</span>
+                            }
+                        </div>
+                        <div class="u-info">
+                            <div class="u-name">
+                                @u.Username
+                                @if (u.IsAdmin)
+                                {
+                                    <span class="badge badge-admin">admin</span>
+                                }
+                            </div>
+                            <div class="u-username muted">
+                                Nadimak: @(string.IsNullOrEmpty(u.Nickname) ? "—" : u.Nickname)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="u-actions one-line">
+                        <form asp-action="UpdateNickname" method="post" class="inline-form one-line">
+                            <input type="hidden" name="grupaId" value="@Model.GrupaId" />
+                            <input type="hidden" name="userId" value="@u.Id" />
+                            <input class="input input-nick w-160" type="text" name="nickname"
+                                   value="@u.Nickname" placeholder="Novi nadimak…" />
+                            <button class="btn btn-primary btn-xs" type="submit">
+                                <span class="icon">✔</span> Sačuvaj
+                            </button>
+                        </form>
+
+                        @if (Model.IsAdmin && (_uid == null || u.Id != _uid.Value))
+                        {
+                            @if (!u.IsAdmin)
+                            {
+                                <form asp-action="SetAdmin" method="post" class="inline-form one-line">
+                                    <input type="hidden" name="grupaId" value="@Model.GrupaId" />
+                                    <input type="hidden" name="userId" value="@u.Id" />
+                                    <button class="btn btn-secondary btn-xs" type="submit">
+                                        <span class="icon">★</span> Dodeli admin
+                                    </button>
+                                </form>
+                            }
+                            <form asp-action="IzbaciClana" method="post" class="inline-form one-line">
+                                <input type="hidden" name="grupaId" value="@Model.GrupaId" />
+                                <input type="hidden" name="userId" value="@u.Id" />
+                                <button class="btn btn-danger btn-xs" type="submit"
+                                        onclick="return confirm('Izbaciti člana @u.Username ?')">
+                                    <span class="icon">🗑</span> Izbaci
+                                </button>
+                            </form>
+                        }
+                    </div>
+
+
+
+                </div>
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const fi = document.getElementById('groupImageInput');
+        const prev = document.getElementById('groupImagePreview');
+        if (fi) {
+          fi.addEventListener('change', e => {
+            const f = e.target.files && e.target.files[0];
+            if (!f) { prev.style.display='none'; return; }
+            const reader = new FileReader();
+            reader.onload = () => {
+              prev.style.display = 'flex';
+              prev.querySelector('img').src = reader.result;
+            };
+            reader.readAsDataURL(f);
+          });
+        }
+    </script>
+}
