@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SplitSync.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ff37f666b4841736bdc8404f4c1f3e69d130cbd5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+329a19ef5b9da5a3c622d0c6302ba2b9e69749b2")]
 [assembly: System.Reflection.AssemblyProductAttribute("SplitSync.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SplitSync.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
