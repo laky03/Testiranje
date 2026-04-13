@@ -52,8 +52,26 @@ namespace SplitSync.Controllers
             _context.Groups.Add(group);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetById), new { id = group.Id }, group);
+            _context.GroupsUsers.Add(new GroupsUsers
+            {
+                GroupId = group.Id,
+                UserId = request.OwnerUserId,
+                IsAdmin = true,
+                JoinedAtUtc = DateTime.UtcNow
+            });
+
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetById), new { id = group.Id }, new
+            {
+                group.Id,
+                group.Name,
+                group.OwnerUserId,
+                group.DefaultValuta,
+                group.CreatedAtUtc
+            });
         }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(long id, UpdateGroupRequest request)
         {

@@ -1,0 +1,371 @@
+@ServerskiDeo_HostAddress = http://localhost:5138
+
+POST {{ServerskiDeo_HostAddress}}/Grad/DodajGrad
+Content-Type: application/json
+Accept: application/json
+
+{
+  "naziv": "Niš",
+  "povrsina": 12345,
+  "brojStanovnika": 123456
+}
+
+###
+
+POST {{ServerskiDeo_HostAddress}}/Grad/DodajGrad
+Content-Type: application/json
+Accept: application/json
+
+{
+  "naziv": "Beograd",
+  "povrsina": 1234,
+  "brojStanovnika": 12345
+}
+
+###
+
+GET {{ServerskiDeo_HostAddress}}/Grad/PreuzmiGradXML/Niš
+Accept: application/xml
+
+###
+
+GET {{ServerskiDeo_HostAddress}}/Grad/PreuzmiGrad/Niš
+Accept: application/json
+
+###
+
+GET {{ServerskiDeo_HostAddress}}/Grad/VratiGradoviInfo
+Accept: application/json
+
+###
+
+POST {{ServerskiDeo_HostAddress}}/Restoran/DodajRestoran/1/Italijanska
+Content-Type: application/json
+Accept: application/json
+
+{
+  "x": 31,
+  "y": 53,
+  "naziv": "Bellisimo",
+  "zbirOcena": 0,
+  "brojOcena": 0,
+  "prihodi": 0,
+  "rashodi": 0
+}
+
+###
+
+POST {{ServerskiDeo_HostAddress}}/Restoran/DodajRestoran/1/Azijska
+Content-Type: application/json
+Accept: application/json
+
+{
+  "x": 24,
+  "y": 89,
+  "naziv": "Thyme",
+  "zbirOcena": 0,
+  "brojOcena": 0,
+  "prihodi": 0,
+  "rashodi": 0
+}
+
+###
+
+POST {{ServerskiDeo_HostAddress}}/Restoran/DodajRestoran/2/Francuska
+Content-Type: application/json
+Accept: application/json
+
+{
+  "x": 4,
+  "y": 12,
+  "naziv": "Spice",
+  "zbirOcena": 0,
+  "brojOcena": 0,
+  "prihodi": 0,
+  "rashodi": 0
+}
+
+###
+
+GET {{ServerskiDeo_HostAddress}}/Restoran/PreuzmiRestoraneUBlizini/31.0001/52.9921/5000/Italijanska
+
+###
+
+GET {{ServerskiDeo_HostAddress}}/Restoran/PreuzmiRestoraneUBlizini/31.0001/52.9921/5000
+
+###
+
+GET {{ServerskiDeo_HostAddress}}/Restoran/PreuzmiRestoraneGrada/1
+
+###
+
+GET {{ServerskiDeo_HostAddress}}/Restoran/NajbliziRestoran/31.0002/52.9991
+
+###
+
+GET {{ServerskiDeo_HostAddress}}/Restoran/NajblizihNRestorana/31.0002/52.9991/5
+
+###
+
+GET {{ServerskiDeo_HostAddress}}/Restoran/VratiMenijeRestorana/1
+
+###
+
+POST {{ServerskiDeo_HostAddress}}/Restoran/OcenjivanjeRestorana/1/10
+Accept: application/json
+
+###
+
+GET {{ServerskiDeo_HostAddress}}/Restoran/TipoviRestorana
+Accept: application/json
+
+###
+
+GET {{ServerskiDeo_HostAddress}}/Restoran/TipoviRestoranaSaInformacijama
+Accept: application/json
+
+###
+
+GET {{ServerskiDeo_HostAddress}}/Restoran/VratiRestoraneTipa?tip=Italijanska
+Accept: application/json
+
+###
+
+POST {{ServerskiDeo_HostAddress}}/Sastojak/DodavanjeSastojka/1000
+Content-Type: application/json
+Accept: application/json
+
+{
+  "naziv": "Brasno",
+  "rokTrajanja": "2029-12-21T00:00:00.000Z",
+  "cena": 1200
+}
+
+###
+
+POST {{ServerskiDeo_HostAddress}}/Sastojak/DodavanjeSastojka/1000
+Content-Type: application/json
+Accept: application/json
+
+{
+  "naziv": "Kvasac",
+  "rokTrajanja": "2029-12-25T00:00:00.000Z",
+  "cena": 3200
+}
+
+###
+
+POST {{ServerskiDeo_HostAddress}}/Sastojak/DodavanjeSastojka/1000
+Content-Type: application/json
+Accept: application/json
+
+{
+  "naziv": "Sok",
+  "rokTrajanja": "2029-12-25T00:00:00.000Z",
+  "cena": 1100
+}
+
+###
+
+POST {{ServerskiDeo_HostAddress}}/Sastojak/DodavanjeSastojka/1000
+Content-Type: application/json
+Accept: application/json
+
+{
+  "naziv": "Testenina",
+  "rokTrajanja": "2030-11-26T00:00:00.000Z",
+  "cena": 1500
+}
+
+###
+
+POST {{ServerskiDeo_HostAddress}}/Sastojak/DodavanjeSastojka/1000
+Content-Type: application/json
+Accept: application/json
+
+{
+  "naziv": "Meso",
+  "rokTrajanja": "2027-10-01T00:00:00.000Z",
+  "cena": 2500
+}
+
+###
+
+POST {{ServerskiDeo_HostAddress}}/Sastojak/DodavanjeSastojka/1000
+Content-Type: application/json
+Accept: application/json
+
+{
+  "naziv": "Voda",
+  "rokTrajanja": "2035-01-01T00:00:00.000Z",
+  "cena": 800
+}
+
+###
+
+POST {{ServerskiDeo_HostAddress}}/Sastojak/DodavanjeSastojkaMagacinuRestorana/1/1/100000
+Accept: application/json
+
+###
+
+POST {{ServerskiDeo_HostAddress}}/Sastojak/DodavanjeSastojkaMagacinuRestorana/2/1/20000
+Accept: application/json
+
+###
+
+POST {{ServerskiDeo_HostAddress}}/Sastojak/DodavanjeSastojkaMagacinuRestorana/2/1/20000
+Accept: application/json
+
+###
+
+POST {{ServerskiDeo_HostAddress}}/Sastojak/DodavanjeSastojkaMagacinuRestorana/3/1/900000
+Accept: application/json
+
+###
+
+POST {{ServerskiDeo_HostAddress}}/Sastojak/DodavanjeSastojkaMagacinuRestorana/6/2/20000
+Accept: application/json
+
+###
+
+POST {{ServerskiDeo_HostAddress}}/Sastojak/DodavanjeSastojkaMagacinuRestorana/7/2/20000
+Accept: application/json
+
+###
+
+POST {{ServerskiDeo_HostAddress}}/Sastojak/DodavanjeSastojkaMagacinuRestorana/8/2/20000
+Accept: application/json
+
+###
+
+POST {{ServerskiDeo_HostAddress}}/Meni/DodavanjeJela/1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "jelo": {
+    "naziv": "Pica",
+    "slika": "SlikaPica.png",
+    "kalorijskaVrednost": 1281,
+    "tip": "Fast food",
+    "daLiJeJelo": true
+  },
+  "sastojci": [
+    {
+      "sastojakID": 1,
+      "kolicina": 1000
+    },
+    {
+      "sastojakID": 2,
+      "kolicina": 200
+    }
+  ]
+}
+
+###
+
+POST {{ServerskiDeo_HostAddress}}/Meni/DodavanjeJela/1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "jelo": {
+    "naziv": "Rižoto",
+    "slika": "SlikaRizoto.png",
+    "kalorijskaVrednost": 882,
+    "tip": "Asian",
+    "daLiJeJelo": true
+  },
+  "sastojci": [
+    {
+      "sastojakID": 1,
+      "kolicina": 980
+    },
+    {
+      "sastojakID": 2,
+      "kolicina": 430
+    }
+  ]
+}
+
+###
+
+POST {{ServerskiDeo_HostAddress}}/Meni/DodavanjeJela/1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "jelo": {
+    "naziv": "Sok",
+    "slika": "SlikaSok.png",
+    "kalorijskaVrednost": 244,
+    "tip": "Drink",
+    "daLiJeJelo": false
+  },
+  "sastojci": [
+    {
+      "sastojakID": 3,
+      "kolicina": 560
+    }
+  ]
+}
+
+###
+
+POST {{ServerskiDeo_HostAddress}}/Meni/DodavanjeJela/2
+Content-Type: application/json
+Accept: application/json
+
+{
+  "jelo": {
+    "naziv": "Pasta",
+    "slika": "SlikaPasta.png",
+    "kalorijskaVrednost": 694,
+    "tip": "Italian",
+    "daLiJeJelo": true
+  },
+  "sastojci": [
+    {
+      "sastojakID": 6,
+      "kolicina": 850
+    },
+    {
+      "sastojakID": 7,
+      "kolicina": 250
+    }
+  ]
+}
+
+###
+
+POST {{ServerskiDeo_HostAddress}}/Meni/DodavanjeJela/2
+Content-Type: application/json
+Accept: application/json
+
+{
+  "jelo": {
+    "naziv": "Voda",
+    "slika": "SlikaVoda.png",
+    "kalorijskaVrednost": 0,
+    "tip": "Drink",
+    "daLiJeJelo": false
+  },
+  "sastojci": [
+    {
+      "sastojakID": 8,
+      "kolicina": 1000
+    }
+  ]
+}
+
+###
+
+DELETE {{ServerskiDeo_HostAddress}}/Meni/BrisanjeJela/1
+Accept: application/json
+
+###
+
+GET {{ServerskiDeo_HostAddress}}/Meni/NarucivanjeJela/2
+Accept: application/json
+
+###

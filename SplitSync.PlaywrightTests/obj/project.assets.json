@@ -2539,24 +2539,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\cirko\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\Bogdan\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\DDD\\Testiranje\\Testiranje\\SplitSync\\SplitSync.PlaywrightTests\\SplitSync.PlaywrightTests.csproj",
+      "projectUniqueName": "C:\\Faks\\TEST\\Testiranje\\SplitSync.PlaywrightTests\\SplitSync.PlaywrightTests.csproj",
       "projectName": "SplitSync.PlaywrightTests",
-      "projectPath": "C:\\DDD\\Testiranje\\Testiranje\\SplitSync\\SplitSync.PlaywrightTests\\SplitSync.PlaywrightTests.csproj",
-      "packagesPath": "C:\\Users\\cirko\\.nuget\\packages\\",
-      "outputPath": "C:\\DDD\\Testiranje\\Testiranje\\SplitSync\\SplitSync.PlaywrightTests\\obj\\",
+      "projectPath": "C:\\Faks\\TEST\\Testiranje\\SplitSync.PlaywrightTests\\SplitSync.PlaywrightTests.csproj",
+      "packagesPath": "C:\\Users\\Bogdan\\.nuget\\packages\\",
+      "outputPath": "C:\\Faks\\TEST\\Testiranje\\SplitSync.PlaywrightTests\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\cirko\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Users\\Bogdan\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -2624,26 +2619,12 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
-        "downloadDependencies": [
-          {
-            "name": "Microsoft.AspNetCore.App.Ref",
-            "version": "[8.0.24, 8.0.24]"
-          },
-          {
-            "name": "Microsoft.NETCore.App.Ref",
-            "version": "[8.0.24, 8.0.24]"
-          },
-          {
-            "name": "Microsoft.WindowsDesktop.App.Ref",
-            "version": "[8.0.24, 8.0.24]"
-          }
-        ],
         "frameworkReferences": {
           "Microsoft.NETCore.App": {
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.103/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

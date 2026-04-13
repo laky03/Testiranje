@@ -1,24 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\DDD\\Testiranje\\Testiranje\\SplitSync\\SplitSync.Tests\\SplitSync.Tests.csproj": {}
+    "C:\\Faks\\TEST\\Testiranje\\SplitSync.Tests\\SplitSync.Tests.csproj": {}
   },
   "projects": {
-    "C:\\DDD\\Testiranje\\Testiranje\\SplitSync\\SplitSync.Tests\\SplitSync.Tests.csproj": {
+    "C:\\Faks\\TEST\\Testiranje\\SplitSync.Tests\\SplitSync.Tests.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\DDD\\Testiranje\\Testiranje\\SplitSync\\SplitSync.Tests\\SplitSync.Tests.csproj",
+        "projectUniqueName": "C:\\Faks\\TEST\\Testiranje\\SplitSync.Tests\\SplitSync.Tests.csproj",
         "projectName": "SplitSync.Tests",
-        "projectPath": "C:\\DDD\\Testiranje\\Testiranje\\SplitSync\\SplitSync.Tests\\SplitSync.Tests.csproj",
-        "packagesPath": "C:\\Users\\cirko\\.nuget\\packages\\",
-        "outputPath": "C:\\DDD\\Testiranje\\Testiranje\\SplitSync\\SplitSync.Tests\\obj\\",
+        "projectPath": "C:\\Faks\\TEST\\Testiranje\\SplitSync.Tests\\SplitSync.Tests.csproj",
+        "packagesPath": "C:\\Users\\Bogdan\\.nuget\\packages\\",
+        "outputPath": "C:\\Faks\\TEST\\Testiranje\\SplitSync.Tests\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\cirko\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\Bogdan\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -32,8 +28,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\DDD\\Testiranje\\Testiranje\\SplitSync\\SplitSync\\SplitSync.csproj": {
-                "projectPath": "C:\\DDD\\Testiranje\\Testiranje\\SplitSync\\SplitSync\\SplitSync.csproj"
+              "C:\\Faks\\TEST\\Testiranje\\SplitSync\\SplitSync.csproj": {
+                "projectPath": "C:\\Faks\\TEST\\Testiranje\\SplitSync\\SplitSync.csproj"
               }
             }
           }
@@ -90,44 +86,26 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[8.0.24, 8.0.24]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Ref",
-              "version": "[8.0.24, 8.0.24]"
-            },
-            {
-              "name": "Microsoft.WindowsDesktop.App.Ref",
-              "version": "[8.0.24, 8.0.24]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.103/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\DDD\\Testiranje\\Testiranje\\SplitSync\\SplitSync\\SplitSync.csproj": {
+    "C:\\Faks\\TEST\\Testiranje\\SplitSync\\SplitSync.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\DDD\\Testiranje\\Testiranje\\SplitSync\\SplitSync\\SplitSync.csproj",
+        "projectUniqueName": "C:\\Faks\\TEST\\Testiranje\\SplitSync\\SplitSync.csproj",
         "projectName": "SplitSync",
-        "projectPath": "C:\\DDD\\Testiranje\\Testiranje\\SplitSync\\SplitSync\\SplitSync.csproj",
-        "packagesPath": "C:\\Users\\cirko\\.nuget\\packages\\",
-        "outputPath": "C:\\DDD\\Testiranje\\Testiranje\\SplitSync\\SplitSync\\obj\\",
+        "projectPath": "C:\\Faks\\TEST\\Testiranje\\SplitSync\\SplitSync.csproj",
+        "packagesPath": "C:\\Users\\Bogdan\\.nuget\\packages\\",
+        "outputPath": "C:\\Faks\\TEST\\Testiranje\\SplitSync\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\cirko\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\Bogdan\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -185,24 +163,6 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[8.0.24, 8.0.24]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Host.win-x64",
-              "version": "[8.0.24, 8.0.24]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Ref",
-              "version": "[8.0.24, 8.0.24]"
-            },
-            {
-              "name": "Microsoft.WindowsDesktop.App.Ref",
-              "version": "[8.0.24, 8.0.24]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.AspNetCore.App": {
               "privateAssets": "none"
@@ -211,7 +171,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.103/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
