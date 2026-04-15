@@ -420,84 +420,6 @@ public partial class WebAppTests : PageTest
     //    });
     //}
 
-    //[Test]
-    //public async Task CreateNewEventWithoutImage()
-    //{
-    //    if (PageWithSettings == null)
-    //    {
-    //        Assert.Fail("Greška, stranica ne postoji.");
-    //        return;
-    //    }
-
-    //    var groupName = $"PW Grupa {DateTime.Now:yyyyMMddHHmmss}";
-    //    var eventName = $"PW Dogadjaj {DateTime.Now:yyyyMMddHHmmss}";
-    //    var eventDescription = "Playwright test opis događaja";
-    //    var eventLocation = "Nis";
-    //    var eventTime = DateTime.Now.AddDays(1).ToString("yyyy-MM-ddTHH:mm");
-
-    //    await PageWithSettings.GotoAsync("http://localhost:5118/Account/Login");
-
-    //    await PageWithSettings.Locator("input[placeholder='Username ili Email']")
-    //        .FillAsync("BogdanFaks");
-
-    //    await PageWithSettings.Locator("input[placeholder='Lozinka']")
-    //        .FillAsync("bogdan003");
-
-    //    await PageWithSettings.GetByRole(AriaRole.Button, new() { Name = "Prijavi se" })
-    //        .ClickAsync();
-
-    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
-
-    //    await PageWithSettings.Locator(".app-menu-icon").First.ClickAsync();
-    //    await PageWithSettings.GetByRole(AriaRole.Link, new() { Name = "Grupe" }).ClickAsync();
-
-    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
-    //    await PageWithSettings.GetByRole(AriaRole.Link, new() { Name = "Nova grupa" })
-    //        .ClickAsync();
-
-    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
-    //    await PageWithSettings.Locator("#Name").FillAsync(groupName);
-
-    //    await PageWithSettings.GetByRole(AriaRole.Button, new() { Name = "Napravi grupu" })
-    //        .ClickAsync();
-
-    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
-    //    await Expect(PageWithSettings.GetByRole(AriaRole.Heading, new() { Name = groupName }))
-    //        .ToBeVisibleAsync();
-
-    //    await PageWithSettings.GetByRole(AriaRole.Link, new() { Name = "Događaji" })
-    //        .ClickAsync();
-
-    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
-    //    await Expect(PageWithSettings.GetByRole(AriaRole.Heading, new() { Name = "Događaji" }))
-    //        .ToBeVisibleAsync();
-
-    //    await PageWithSettings.GetByRole(AriaRole.Link, new() { Name = "Novi događaj" })
-    //        .ClickAsync();
-
-    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
-    //    await Expect(PageWithSettings.GetByRole(AriaRole.Heading, new() { Name = "Novi događaj" }))
-    //        .ToBeVisibleAsync();
-
-    //    await PageWithSettings.Locator("input[name='Naziv']").FillAsync(eventName);
-    //    await PageWithSettings.Locator("textarea[name='Opis']").FillAsync(eventDescription);
-    //    await PageWithSettings.Locator("input[name='Lokacija']").FillAsync(eventLocation);
-    //    await PageWithSettings.Locator("input[name='VremeDogadjaja']").FillAsync(eventTime);
-
-    //    await PageWithSettings.GetByRole(AriaRole.Button, new() { Name = "Kreiraj" })
-    //        .ClickAsync();
-
-    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
-
-    //    await Expect(PageWithSettings.GetByText(eventName)).ToBeVisibleAsync();
-    //    await Expect(PageWithSettings.GetByText(eventLocation)).ToBeVisibleAsync();
-
-    //    await PageWithSettings.ScreenshotAsync(new()
-    //    {
-    //        FullPage = true,
-    //        Path = "../../../Images/CreateEventSuccess.png"
-    //    });
-    //}
 
     //[Test]
     //public async Task MarkShoppingItemAsPurchased()
@@ -569,6 +491,401 @@ public partial class WebAppTests : PageTest
     //        Path = "../../../Images/ShoppingItemPurchased.png"
     //    });
     //}
+
+    //[Test]
+    //public async Task EditGroupNameInSettings()
+    //{
+    //    if (PageWithSettings == null)
+    //    {
+    //        Assert.Fail("Greška, stranica ne postoji.");
+    //        return;
+    //    }
+
+    //    var originalGroupName = $"PW Grupa {DateTime.Now:yyyyMMddHHmmss}";
+    //    var updatedGroupName = $"PW Edit{DateTime.Now:HHmmss}";
+
+    //    await PageWithSettings.GotoAsync("http://localhost:5118/Account/Login");
+
+    //    await PageWithSettings.Locator("input[placeholder='Username ili Email']")
+    //        .FillAsync("BogdanFaks");
+
+    //    await PageWithSettings.Locator("input[placeholder='Lozinka']")
+    //        .FillAsync("bogdan003");
+
+    //    await PageWithSettings.GetByRole(AriaRole.Button, new() { Name = "Prijavi se" })
+    //        .ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+    //    await PageWithSettings.Locator(".app-menu-icon").First.ClickAsync();
+    //    await PageWithSettings.GetByRole(AriaRole.Link, new() { Name = "Grupe" }).ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+    //    await PageWithSettings.GetByRole(AriaRole.Link, new() { Name = "Nova grupa" })
+    //        .ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+    //    await PageWithSettings.Locator("#Name").FillAsync(originalGroupName);
+
+    //    await PageWithSettings.GetByRole(AriaRole.Button, new() { Name = "Napravi grupu" })
+    //        .ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+    //    await Expect(PageWithSettings.GetByRole(AriaRole.Heading, new() { Name = originalGroupName }))
+    //        .ToBeVisibleAsync();
+
+    //    await PageWithSettings.GetByRole(AriaRole.Link, new() { Name = "Podešavanja" })
+    //        .Last
+    //        .ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+    //    await PageWithSettings.Locator("input[name='nazivGrupe']").FillAsync(updatedGroupName);
+
+    //    await PageWithSettings.GetByRole(AriaRole.Button, new() { Name = "Sačuvaj" })
+    //        .First
+    //        .ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+    //    await Expect(PageWithSettings.GetByRole(AriaRole.Heading, new() { Name = updatedGroupName }))
+    //        .ToBeVisibleAsync();
+
+    //    await PageWithSettings.ScreenshotAsync(new()
+    //    {
+    //        FullPage = true,
+    //        Path = "../../../Images/EditGroupNameSuccess.png"
+    //    });
+    //}
+
+    //[Test]
+    //public async Task EditEvent()
+    //{
+    //    if (PageWithSettings == null)
+    //    {
+    //        Assert.Fail("Greška, stranica ne postoji.");
+    //        return;
+    //    }
+
+    //    var groupName = $"PWGrupa{DateTime.Now:HHmmss}";
+    //    var originalEventName = $"PWDog{DateTime.Now:HHmmss}";
+    //    var updatedEventName = $"PWEditDog{DateTime.Now:HHmmss}";
+    //    var originalDescription = "Original opis";
+    //    var updatedDescription = "Izmenjen opis";
+    //    var originalLocation = "Nis";
+    //    var updatedLocation = "Beograd";
+    //    var eventTime = DateTime.Now.AddDays(1).ToString("yyyy-MM-ddTHH:mm");
+
+    //    await PageWithSettings.GotoAsync("http://localhost:5118/Account/Login");
+
+    //    await PageWithSettings.Locator("input[placeholder='Username ili Email']")
+    //        .FillAsync("BogdanFaks");
+
+    //    await PageWithSettings.Locator("input[placeholder='Lozinka']")
+    //        .FillAsync("bogdan003");
+
+    //    await PageWithSettings.GetByRole(AriaRole.Button, new() { Name = "Prijavi se" })
+    //        .ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+    //    await PageWithSettings.Locator(".app-menu-icon").First.ClickAsync();
+    //    await PageWithSettings.GetByRole(AriaRole.Link, new() { Name = "Grupe" }).ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+    //    await PageWithSettings.GetByRole(AriaRole.Link, new() { Name = "Nova grupa" })
+    //        .ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+    //    await PageWithSettings.Locator("#Name").FillAsync(groupName);
+
+    //    await PageWithSettings.GetByRole(AriaRole.Button, new() { Name = "Napravi grupu" })
+    //        .ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+    //    await Expect(PageWithSettings.GetByRole(AriaRole.Heading, new() { Name = groupName }))
+    //        .ToBeVisibleAsync();
+
+    //    await PageWithSettings.GetByRole(AriaRole.Link, new() { Name = "Događaji" })
+    //        .ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+    //    await PageWithSettings.GetByRole(AriaRole.Link, new() { Name = "Novi događaj" })
+    //        .ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+    //    await PageWithSettings.Locator("input[name='Naziv']").FillAsync(originalEventName);
+    //    await PageWithSettings.Locator("textarea[name='Opis']").FillAsync(originalDescription);
+    //    await PageWithSettings.Locator("input[name='Lokacija']").FillAsync(originalLocation);
+    //    await PageWithSettings.Locator("input[name='VremeDogadjaja']").FillAsync(eventTime);
+
+    //    await PageWithSettings.GetByRole(AriaRole.Button, new() { Name = "Kreiraj" })
+    //        .ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+    //    await Expect(PageWithSettings.GetByText(originalEventName)).ToBeVisibleAsync();
+
+    //    await PageWithSettings.GetByRole(AriaRole.Link, new() { Name = "Uredi" })
+    //        .First
+    //        .ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+    //    await PageWithSettings.Locator("input[name='Naziv']").FillAsync(updatedEventName);
+    //    await PageWithSettings.Locator("textarea[name='Opis']").FillAsync(updatedDescription);
+    //    await PageWithSettings.Locator("input[name='Lokacija']").FillAsync(updatedLocation);
+
+    //    await PageWithSettings.GetByRole(AriaRole.Button, new() { Name = "Sačuvaj" })
+    //        .ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+    //    await Expect(PageWithSettings.GetByText(updatedEventName)).ToBeVisibleAsync();
+    //    await Expect(PageWithSettings.GetByText(updatedLocation)).ToBeVisibleAsync();
+
+    //    await PageWithSettings.ScreenshotAsync(new()
+    //    {
+    //        FullPage = true,
+    //        Path = "../../../Images/EditEventSuccess.png"
+    //    });
+    //}
+
+    //[Test]
+    //public async Task DeleteShoppingItem()
+    //{
+    //    if (PageWithSettings == null)
+    //    {
+    //        Assert.Fail("Greška, stranica ne postoji.");
+    //        return;
+    //    }
+
+    //    var groupName = $"PWGrupa{DateTime.Now:HHmmss}";
+    //    var itemName = $"PWStavka{DateTime.Now:HHmmss}";
+
+    //    await PageWithSettings.GotoAsync("http://localhost:5118/Account/Login");
+
+    //    await PageWithSettings.Locator("input[placeholder='Username ili Email']")
+    //        .FillAsync("BogdanFaks");
+
+    //    await PageWithSettings.Locator("input[placeholder='Lozinka']")
+    //        .FillAsync("bogdan003");
+
+    //    await PageWithSettings.GetByRole(AriaRole.Button, new() { Name = "Prijavi se" })
+    //        .ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+    //    await PageWithSettings.Locator(".app-menu-icon").First.ClickAsync();
+    //    await PageWithSettings.GetByRole(AriaRole.Link, new() { Name = "Grupe" }).ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+    //    await PageWithSettings.GetByRole(AriaRole.Link, new() { Name = "Nova grupa" }).ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+    //    await PageWithSettings.Locator("#Name").FillAsync(groupName);
+
+    //    await PageWithSettings.GetByRole(AriaRole.Button, new() { Name = "Napravi grupu" })
+    //        .ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+    //    await PageWithSettings.GetByRole(AriaRole.Link, new() { Name = "Shopping lista", Exact = true })
+    //        .Last
+    //        .ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+    //    await PageWithSettings.Locator("input[name='naziv']").FillAsync(itemName);
+
+    //    await PageWithSettings.GetByRole(AriaRole.Button, new() { Name = "Dodaj" })
+    //        .ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+    //    await Expect(PageWithSettings.GetByText(itemName)).ToBeVisibleAsync();
+
+    //    await PageWithSettings.Locator(".shop-row", new() { HasText = itemName })
+    //        .GetByRole(AriaRole.Button, new() { Name = "Obriši" })
+    //        .ClickAsync();
+
+    //    await PageWithSettings.GetByRole(AriaRole.Button, new() { Name = "Obriši" })
+    //        .Last
+    //        .ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+    //    await Expect(PageWithSettings.GetByText(itemName)).ToHaveCountAsync(0);
+
+    //    await PageWithSettings.ScreenshotAsync(new()
+    //    {
+    //        FullPage = true,
+    //        Path = "../../../Images/DeleteShoppingItemSuccess.png"
+    //    });
+    //}
+
+    //[Test]
+    //public async Task DeleteBill()
+    //{
+    //    if (PageWithSettings == null)
+    //    {
+    //        Assert.Fail("Greška, stranica ne postoji.");
+    //        return;
+    //    }
+
+    //    var groupName = $"PWGrupa{DateTime.Now:HHmmss}";
+    //    var billName = $"PWRacun{DateTime.Now:HHmmss}";
+    //    var amount = new Random().Next(100, 5000).ToString();
+
+    //    await PageWithSettings.GotoAsync("http://localhost:5118/Account/Login");
+
+    //    await PageWithSettings.Locator("input[placeholder='Username ili Email']")
+    //        .FillAsync("BogdanFaks");
+
+    //    await PageWithSettings.Locator("input[placeholder='Lozinka']")
+    //        .FillAsync("bogdan003");
+
+    //    await PageWithSettings.GetByRole(AriaRole.Button, new() { Name = "Prijavi se" })
+    //        .ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+    //    await PageWithSettings.Locator(".app-menu-icon").First.ClickAsync();
+    //    await PageWithSettings.GetByRole(AriaRole.Link, new() { Name = "Grupe" }).ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+    //    await PageWithSettings.GetByRole(AriaRole.Link, new() { Name = "Nova grupa" }).ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+    //    await PageWithSettings.Locator("#Name").FillAsync(groupName);
+
+    //    await PageWithSettings.GetByRole(AriaRole.Button, new() { Name = "Napravi grupu" })
+    //        .ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+    //    await PageWithSettings.GetByRole(AriaRole.Link, new() { Name = "Računi" })
+    //        .ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+    //    await PageWithSettings.GetByRole(AriaRole.Link, new() { Name = "Novi račun" })
+    //        .First
+    //        .ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+    //    await PageWithSettings.Locator("input[name='Naziv']").FillAsync(billName);
+    //    await PageWithSettings.Locator("select[name='Clanovi[0].UserId']").SelectOptionAsync("1");
+    //    await PageWithSettings.Locator("input[name='Clanovi[0].Iznos']").FillAsync(amount);
+    //    await PageWithSettings.Locator("input[name='Clanovi[0].DeoRacuna']").FillAsync(amount);
+
+    //    await PageWithSettings.GetByRole(AriaRole.Button, new() { Name = "Sačuvaj" })
+    //        .ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+    //    await Expect(PageWithSettings.GetByText(billName)).ToBeVisibleAsync();
+
+    //    await PageWithSettings.Locator(".bill-card", new() { HasText = billName })
+    //        .GetByRole(AriaRole.Button, new() { Name = "Obriši" })
+    //        .ClickAsync();
+
+    //    await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+    //    await Expect(PageWithSettings.GetByText(billName)).ToHaveCountAsync(0);
+
+    //    await PageWithSettings.ScreenshotAsync(new()
+    //    {
+    //        FullPage = true,
+    //        Path = "../../../Images/DeleteBillSuccess.png"
+    //    });
+    //}
+
+    [Test]
+    public async Task DeleteEvent()
+    {
+        if (PageWithSettings == null)
+        {
+            Assert.Fail("Greška, stranica ne postoji.");
+            return;
+        }
+
+        var groupName = $"PWGrupa{DateTime.Now:HHmmss}";
+        var eventName = $"PWDog{DateTime.Now:HHmmss}";
+        var eventDescription = "Opis događaja";
+        var eventLocation = "Nis";
+        var eventTime = DateTime.Now.AddDays(1).ToString("yyyy-MM-ddTHH:mm");
+
+        await PageWithSettings.GotoAsync("http://localhost:5118/Account/Login");
+
+        await PageWithSettings.Locator("input[placeholder='Username ili Email']")
+            .FillAsync("BogdanFaks");
+
+        await PageWithSettings.Locator("input[placeholder='Lozinka']")
+            .FillAsync("bogdan003");
+
+        await PageWithSettings.GetByRole(AriaRole.Button, new() { Name = "Prijavi se" })
+            .ClickAsync();
+
+        await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        await PageWithSettings.Locator(".app-menu-icon").First.ClickAsync();
+        await PageWithSettings.GetByRole(AriaRole.Link, new() { Name = "Grupe" }).ClickAsync();
+
+        await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await PageWithSettings.GetByRole(AriaRole.Link, new() { Name = "Nova grupa" })
+            .ClickAsync();
+
+        await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await PageWithSettings.Locator("#Name").FillAsync(groupName);
+
+        await PageWithSettings.GetByRole(AriaRole.Button, new() { Name = "Napravi grupu" })
+            .ClickAsync();
+
+        await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Expect(PageWithSettings.GetByRole(AriaRole.Heading, new() { Name = groupName }))
+            .ToBeVisibleAsync();
+
+        await PageWithSettings.GetByRole(AriaRole.Link, new() { Name = "Događaji" })
+            .ClickAsync();
+
+        await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        await PageWithSettings.GetByRole(AriaRole.Link, new() { Name = "Novi događaj" })
+            .ClickAsync();
+
+        await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        await PageWithSettings.Locator("input[name='Naziv']").FillAsync(eventName);
+        await PageWithSettings.Locator("textarea[name='Opis']").FillAsync(eventDescription);
+        await PageWithSettings.Locator("input[name='Lokacija']").FillAsync(eventLocation);
+        await PageWithSettings.Locator("input[name='VremeDogadjaja']").FillAsync(eventTime);
+
+        await PageWithSettings.GetByRole(AriaRole.Button, new() { Name = "Kreiraj" })
+            .ClickAsync();
+
+        await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Expect(PageWithSettings.GetByText(eventName)).ToBeVisibleAsync();
+
+        await PageWithSettings.GetByRole(AriaRole.Link, new() { Name = "Uredi" })
+            .First
+            .ClickAsync();
+
+        await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        await PageWithSettings.GetByRole(AriaRole.Button, new() { Name = "Obriši" })
+            .ClickAsync();
+
+        await PageWithSettings.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        await Expect(PageWithSettings.GetByText(eventName)).ToHaveCountAsync(0);
+
+        await PageWithSettings.ScreenshotAsync(new()
+        {
+            FullPage = true,
+            Path = "../../../Images/DeleteEventSuccess.png"
+        });
+    }
 
     [TearDown]
     public async Task Teardown()
